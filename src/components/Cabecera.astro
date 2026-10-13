@@ -1,0 +1,39 @@
+---
+import { perfil } from '../data/perfil';
+
+const secciones = [
+	{ href: '/#sobre-mi', texto: 'Sobre mí' },
+	{ href: '/#experiencia', texto: 'Experiencia' },
+	{ href: '/#proyectos', texto: 'Proyectos' },
+	{ href: '/#habilidades', texto: 'Habilidades' },
+	{ href: '/#contacto', texto: 'Contacto' },
+];
+---
+
+<header class="cabecera">
+	<div class="contenedor cabecera__interior">
+		<a class="marca" href="/">{perfil.nombreCorto}</a>
+		<nav class="navegacion" aria-label="Principal">
+			<ul>
+				{
+					secciones.map((seccion) => (
+						<li>
+							<a href={seccion.href}>{seccion.texto}</a>
+						</li>
+					))
+				}
+			</ul>
+		</nav>
+		<!-- Oculto hasta que cargue el script: sin JavaScript no funcionaría. -->
+		<button class="boton-tema" type="button" data-cambiar-tema aria-pressed="false" hidden>
+			<span class="visualmente-oculto">Tema oscuro</span>
+			<svg class="icono icono--luna" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+				<path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"></path>
+			</svg>
+			<svg class="icono icono--sol" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+				<circle cx="12" cy="12" r="4.2" fill="none" stroke="currentColor" stroke-width="1.8"></circle>
+				<path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path>
+			</svg>
+		</button>
+	</div>
+</header>

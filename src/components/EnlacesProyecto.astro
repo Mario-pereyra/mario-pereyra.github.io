@@ -1,0 +1,33 @@
+---
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+	proyecto: CollectionEntry<'proyectos'>;
+}
+
+const { proyecto } = Astro.props;
+const { titulo, demo, codigo, codigoPrivado } = proyecto.data;
+---
+
+<ul class="enlaces-proyecto">
+	{
+		demo && (
+			<li>
+				<a href={demo}>
+					Demo<span class="visualmente-oculto"> de {titulo}</span>
+				</a>
+			</li>
+		)
+	}
+	{
+		codigo.map((repo) => (
+			<li>
+				<a href={repo.url}>
+					{repo.etiqueta}
+					<span class="visualmente-oculto"> de {titulo} en GitHub</span>
+				</a>
+			</li>
+		))
+	}
+	{codigoPrivado && <li class="enlaces-proyecto__nota">Código privado</li>}
+</ul>

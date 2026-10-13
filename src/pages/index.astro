@@ -1,0 +1,208 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import TarjetaProyecto from '../components/TarjetaProyecto.astro';
+import Enlaces from '../components/EnlacesProyecto.astro';
+import { perfil, pilares, experiencia, formacion, habilidades, tiposDeProyecto } from '../data/perfil';
+
+const proyectos = (await getCollection('proyectos')).sort((a, b) => a.data.orden - b.data.orden);
+const destacados = proyectos.filter((proyecto) => proyecto.data.destacado);
+const otros = proyectos.filter((proyecto) => !proyecto.data.destacado);
+
+const jsonLd = {
+	'@context': 'https://schema.org',
+	'@type': 'ProfilePage',
+	dateModified: perfil.actualizado,
+	mainEntity: {
+		'@type': 'Person',
+		name: perfil.nombre,
+		url: Astro.site?.href,
+		description: perfil.descripcion,
+		jobTitle: 'Consultor TOTVS Protheus',
+		worksFor: { '@type': 'Organization', name: 'Resultar Soluciones SRL' },
+		affiliation: { '@type': 'CollegeOrUniversity', name: 'Universidad NUR' },
+		address: { '@type': 'PostalAddress', addressLocality: 'Santa Cruz de la Sierra', addressCountry: 'BO' },
+		knowsAbout: ['TypeScript', 'React', 'Node.js', 'SQL', 'AdvPL', 'TOTVS Protheus', 'Model Context Protocol'],
+		knowsLanguage: ['es', 'en'],
+		sameAs: [perfil.enlaces.github, perfil.enlaces.linkedin],
+	},
+};
+---
+
+<Base titulo={`${perfil.nombre} · Desarrollador`} descripcion={perfil.descripcion} jsonLd={jsonLd}>
+	<section class="portada contenedor" aria-labelledby="titulo-portada">
+		<p class="etiqueta">{perfil.ubicacion}</p>
+		<h1 id="titulo-portada">{perfil.nombre}</h1>
+		<p class="portada__rol">{perfil.rol}</p>
+		<p class="portada__intro">{perfil.presentacion}</p>
+		<div class="acciones">
+			<a class="boton boton--principal" href="#proyectos">Ver proyectos</a>
+			<a class="boton" href={perfil.cv} download>Descargar CV</a>
+		</div>
+		<ul class="enlaces-sociales">
+			<li><a href={perfil.enlaces.github}>GitHub</a></li>
+			<li><a href={perfil.enlaces.linkedin}>LinkedIn</a></li>
+		</ul>
+	</section>
+
+	<section class="seccion" id="sobre-mi" aria-labelledby="titulo-sobre-mi">
+		<div class="contenedor">
+			<h2 class="seccion__titulo" id="titulo-sobre-mi">Sobre mí</h2>
+			<div class="texto">
+				<p>
+					Soy desarrollador y estudio Ingeniería de Sistemas en la Universidad NUR. Desde octubre de 2025 trabajo en Resultar
+					Soluciones SRL, donde programo en AdvPL y SQL personalizaciones del ERP TOTVS Protheus para empresas cliente y relevo
+					sus procesos con los usuarios. Por mi cuenta construyo aplicaciones web con TypeScript, React y Node.js, y herramientas
+					de IA aplicada.
+				</p>
+				<p>
+					Mi norte de aprendizaje es el rol de Forward Deployed Engineer: trabajar junto al cliente para llevar un producto
+					a producción dentro de sus procesos.
+				</p>
+			</div>
+			<ul class="pilares">
+				{
+					pilares.map((pilar) => (
+						<li class="tarjeta">
+							<h3>{pilar.titulo}</h3>
+							<p>{pilar.texto}</p>
+						</li>
+					))
+				}
+			</ul>
+		</div>
+	</section>
+
+	<section class="seccion" id="experiencia" aria-labelledby="titulo-experiencia">
+		<div class="contenedor">
+			<h2 class="seccion__titulo" id="titulo-experiencia">Experiencia</h2>
+			{
+				experiencia.map((puesto) => (
+					<article class="entrada">
+						<div class="entrada__cabecera">
+							<div>
+								<h3>{puesto.puesto}</h3>
+								<p class="entrada__organizacion">{puesto.organizacion}</p>
+							</div>
+							<p class="entrada__fecha">
+								{puesto.periodo}
+								<br />
+								{puesto.lugar}
+							</p>
+						</div>
+						<p class="entrada__contexto">{puesto.contexto}</p>
+						<ul class="lista">
+							{puesto.logros.map((logro) => (
+								<li>{logro}</li>
+							))}
+						</ul>
+					</article>
+				))
+			}
+		</div>
+	</section>
+
+	<section class="seccion" id="proyectos" aria-labelledby="titulo-proyectos">
+		<div class="contenedor">
+			<h2 class="seccion__titulo" id="titulo-proyectos">Proyectos</h2>
+			<div class="proyectos">
+				{destacados.map((proyecto) => <TarjetaProyecto proyecto={proyecto} />)}
+			</div>
+			<h3 class="subtitulo">Otros proyectos</h3>
+			<ul class="otros">
+				{
+					otros.map((proyecto) => (
+						<li class="otro">
+							<div>
+								<a class="otro__titulo" href={`/proyectos/${proyecto.id}/`}>
+									{proyecto.data.titulo}
+								</a>
+								<span class="otro__meta">
+									{tiposDeProyecto[proyecto.data.tipo]} · {proyecto.data.periodo}
+								</span>
+							</div>
+							<p>{proyecto.data.resumen}</p>
+							<Enlaces proyecto={proyecto} />
+						</li>
+					))
+				}
+			</ul>
+		</div>
+	</section>
+
+	<section class="seccion" id="habilidades" aria-labelledby="titulo-habilidades">
+		<div class="contenedor">
+			<h2 class="seccion__titulo" id="titulo-habilidades">Habilidades</h2>
+			<div class="habilidades">
+				{
+					habilidades.map((grupo) => (
+						<div class="habilidades__grupo">
+							<h3>{grupo.grupo}</h3>
+							<dl class="niveles">
+								{grupo.niveles.map(({ nivel, items }) => (
+									<div class="nivel">
+										<dt>{nivel}</dt>
+										<dd>
+											<ul class="chips">
+												{items.map((item) => (
+													<li class="chip">{item}</li>
+												))}
+											</ul>
+										</dd>
+									</div>
+								))}
+							</dl>
+						</div>
+					))
+				}
+			</div>
+		</div>
+	</section>
+
+	<section class="seccion" id="formacion" aria-labelledby="titulo-formacion">
+		<div class="contenedor">
+			<h2 class="seccion__titulo" id="titulo-formacion">Formación</h2>
+			{
+				formacion.map((estudio) => (
+					<article class="entrada">
+						<div class="entrada__cabecera">
+							<div>
+								<h3>{estudio.institucion}</h3>
+								<p class="entrada__organizacion">{estudio.titulo}</p>
+							</div>
+							<p class="entrada__fecha">
+								{estudio.periodo}
+								<br />
+								{estudio.lugar}
+							</p>
+						</div>
+						<p class="entrada__contexto">{estudio.detalle}</p>
+					</article>
+				))
+			}
+		</div>
+	</section>
+
+	<section class="seccion seccion--contacto" id="contacto" aria-labelledby="titulo-contacto">
+		<div class="contenedor">
+			<h2 class="seccion__titulo" id="titulo-contacto">Contacto</h2>
+			<p class="texto">
+				Si buscas un desarrollador backend o full stack, o alguien para proyectos donde la tecnología se implementa junto al cliente, escríbeme.
+			</p>
+			<div class="acciones">
+				<a
+					class="boton boton--principal"
+					href="#contacto"
+					data-correo-usuario={perfil.correo.usuario}
+					data-correo-dominio={perfil.correo.dominio}>Escribir un correo</a
+				>
+				<a class="boton" href={perfil.cv} download>Descargar CV</a>
+				<a class="boton" href={perfil.enlaces.linkedin}>LinkedIn</a>
+				<a class="boton" href={perfil.enlaces.github}>GitHub</a>
+			</div>
+			<p class="nota">
+				Correo: <span data-correo-texto>se muestra con JavaScript activado; también puedes escribirme por LinkedIn</span>.
+			</p>
+		</div>
+	</section>
+</Base>

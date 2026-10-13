@@ -1,0 +1,45 @@
+---
+import { getCollection, render, type CollectionEntry } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import Enlaces from '../../components/EnlacesProyecto.astro';
+import { perfil, tiposDeProyecto } from '../../data/perfil';
+
+export async function getStaticPaths() {
+	const proyectos = await getCollection('proyectos');
+	return proyectos.map((proyecto) => ({ params: { slug: proyecto.id }, props: { proyecto } }));
+}
+
+interface Props {
+	proyecto: CollectionEntry<'proyectos'>;
+}
+
+const { proyecto } = Astro.props;
+const { titulo, resumen, tipo, equipo, periodo, stack, aporte } = proyecto.data;
+const { Content } = await render(proyecto);
+---
+
+<Base titulo={`${titulo} · ${perfil.nombre}`} descripcion={resumen}>
+	<article class="caso contenedor">
+		<a class="volver" href="/#proyectos">Volver a proyectos</a>
+		<p class="etiqueta">
+			{tiposDeProyecto[tipo]}{equipo && `, ${equipo}`} · {periodo}
+		</p>
+		<h1>{titulo}</h1>
+		<p class="caso__resumen">{resumen}</p>
+		<Enlaces proyecto={proyecto} />
+
+		<h2>Tecnologías</h2>
+		<ul class="chips">
+			{stack.map((tecnologia) => <li class="chip">{tecnologia}</li>)}
+		</ul>
+
+		<h2>{equipo ? 'Mi parte' : 'Qué hice'}</h2>
+		<ul class="lista">
+			{aporte.map((punto) => <li>{punto}</li>)}
+		</ul>
+
+		<div class="prosa">
+			<Content />
+		</div>
+	</article>
+</Base>

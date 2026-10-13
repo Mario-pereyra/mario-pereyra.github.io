@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://mario-pereyra.github.io/sitemap-index.xml

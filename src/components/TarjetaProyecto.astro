@@ -1,0 +1,28 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { tiposDeProyecto } from '../data/perfil';
+import Enlaces from './EnlacesProyecto.astro';
+
+interface Props {
+	proyecto: CollectionEntry<'proyectos'>;
+}
+
+const { proyecto } = Astro.props;
+const { titulo, resumen, tipo, equipo, periodo, stack } = proyecto.data;
+const url = `/proyectos/${proyecto.id}/`;
+---
+
+<article class="proyecto">
+	<p class="proyecto__meta">
+		{tiposDeProyecto[tipo]}{equipo && `, ${equipo}`} · {periodo}
+	</p>
+	<h3 class="proyecto__titulo"><a href={url}>{titulo}</a></h3>
+	<p class="proyecto__resumen">{resumen}</p>
+	<ul class="chips" aria-label="Tecnologías">
+		{stack.slice(0, 6).map((tecnologia) => <li class="chip">{tecnologia}</li>)}
+	</ul>
+	<div class="proyecto__pie">
+		<a class="enlace-flecha" href={url}>Ver el caso<span class="visualmente-oculto">: {titulo}</span></a>
+		<Enlaces proyecto={proyecto} />
+	</div>
+</article>
