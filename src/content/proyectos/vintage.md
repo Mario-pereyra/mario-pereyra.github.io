@@ -12,7 +12,9 @@ aporte:
   - Aislé la lógica de negocio en un módulo de dominio con 16 archivos de prueba en Vitest.
   - Configuré la integración continua en GitHub Actions y documenté las decisiones de arquitectura en ADR.
 demo: https://vintage.marioelprogamer710.workers.dev
-codigoPrivado: true
+codigo:
+  - etiqueta: Código
+    url: https://github.com/Mario-pereyra/vintage
 ---
 
 ## Contexto
