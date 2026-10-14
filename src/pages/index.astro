@@ -176,19 +176,32 @@ const jsonLd = {
 					</div>
 					<p class="trabajo__contexto">{trabajo.contexto}</p>
 
-					<ul class="cifras" aria-label="El puesto en cifras">
-						{
-							trabajo.cifras.map((c) => (
-								<li class="cifra">
-									<span class="cifra__valor" data-cifra={c.valor}>
-										{c.valor}
-									</span>
-									<span class="cifra__etiqueta">{c.etiqueta}</span>
-								</li>
-							))
-						}
-					</ul>
-					<p class="cifras__nota">Las cifras de código salen de git, de enero a octubre de 2026.</p>
+					<div class="puesto">
+						<div class="puesto__celda">
+							<p class="puesto__clave">módulos<span class="c-tenue">:</span></p>
+							<ul class="modulos">
+								{
+									trabajo.modulos.map((m) => (
+										<li>
+											<code>{m.codigo}</code> {m.nombre}
+										</li>
+									))
+								}
+							</ul>
+						</div>
+						<div class="puesto__celda">
+							<p class="puesto__clave">herramientas<span class="c-tenue">:</span></p>
+							<ul class="iconos">
+								{
+									trabajo.herramientas.map((h) => (
+										<li>
+											<Icono id={h.id} nombre={h.nombre} />
+										</li>
+									))
+								}
+							</ul>
+						</div>
+					</div>
 
 					<ul class="diff">
 						{trabajo.logros.map((logro) => <li>{logro}</li>)}
@@ -771,57 +784,70 @@ const jsonLd = {
 		color: var(--texto-2);
 	}
 
-	.cifras {
+	.puesto {
 		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(8.5rem, 1fr));
 		gap: 1px;
 		margin-top: 1.75rem;
 		border: 1px solid var(--borde);
 		border-radius: var(--radio-chico);
 		background: var(--borde);
-		list-style: none;
-		overflow: hidden;
 	}
 
-	.cifra {
+	@media (min-width: 40rem) {
+		.puesto {
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+		}
+	}
+
+	.puesto__celda {
 		display: grid;
-		gap: 0.2rem;
-		padding: 1.1rem 1.1rem 1rem;
+		align-content: start;
+		gap: 0.75rem;
+		padding: 1.1rem 1.25rem 1.2rem;
 		background: var(--fondo-2);
 	}
 
-	.cifra__valor {
+	.puesto__celda:first-child {
+		border-radius: var(--radio-chico) var(--radio-chico) 0 0;
+	}
+
+	.puesto__celda:last-child {
+		border-radius: 0 0 var(--radio-chico) var(--radio-chico);
+	}
+
+	@media (min-width: 40rem) {
+		.puesto__celda:first-child {
+			border-radius: var(--radio-chico) 0 0 var(--radio-chico);
+		}
+		.puesto__celda:last-child {
+			border-radius: 0 var(--radio-chico) var(--radio-chico) 0;
+		}
+	}
+
+	.puesto__clave {
 		font-family: var(--mono);
-		font-size: clamp(2rem, 4vw, 2.75rem);
-		font-weight: 600;
-		line-height: 1;
+		font-size: 0.8125rem;
+		color: var(--azul);
+	}
+
+	.modulos {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.5rem 1.25rem;
+		list-style: none;
+	}
+
+	.modulos li {
+		color: var(--texto);
+	}
+
+	.modulos code {
+		margin-right: 0.3rem;
+		padding: 0.15rem 0.45rem;
+		border-radius: 5px;
+		background: var(--fondo-3);
+		font-size: 0.8125rem;
 		color: var(--amarillo);
-		font-variant-numeric: tabular-nums;
-	}
-
-	.cifra:nth-child(2) .cifra__valor {
-		color: var(--verde);
-	}
-	.cifra:nth-child(3) .cifra__valor {
-		color: var(--aqua);
-	}
-	.cifra:nth-child(4) .cifra__valor {
-		color: var(--naranja);
-	}
-	.cifra:nth-child(5) .cifra__valor {
-		color: var(--rosa);
-	}
-
-	.cifra__etiqueta {
-		font-size: 0.875rem;
-		color: var(--texto-2);
-	}
-
-	.cifras__nota {
-		margin-top: 0.5rem;
-		font-family: var(--mono);
-		font-size: 0.75rem;
-		color: var(--texto-3);
 	}
 
 	/* Logros como un diff: líneas agregadas. */
@@ -1130,36 +1156,7 @@ const jsonLd = {
 </style>
 
 <script>
-	// Cifras que se cuentan solas al entrar en pantalla. El número final ya está en el HTML.
 	const quieto = matchMedia('(prefers-reduced-motion: reduce)').matches;
-	const cifras = [...document.querySelectorAll<HTMLElement>('[data-cifra]')];
-	if (!quieto && 'IntersectionObserver' in window) {
-		const contar = (el: HTMLElement) => {
-			const final = Number(el.dataset.cifra);
-			const inicio = performance.now();
-			const duracion = 900 + final * 25;
-			const cuadro = (ahora: number) => {
-				const t = Math.min(1, (ahora - inicio) / duracion);
-				el.textContent = String(Math.round(final * (1 - (1 - t) ** 3)));
-				if (t < 1) requestAnimationFrame(cuadro);
-			};
-			requestAnimationFrame(cuadro);
-		};
-		const observador = new IntersectionObserver(
-			(entradas) => {
-				for (const e of entradas) {
-					if (!e.isIntersecting) continue;
-					observador.unobserve(e.target);
-					contar(e.target as HTMLElement);
-				}
-			},
-			{ threshold: 0.6 },
-		);
-		for (const c of cifras) {
-			c.textContent = '0';
-			observador.observe(c);
-		}
-	}
 
 	// Filtro de proyectos, con una transición suave donde el navegador la soporta.
 	const grupo = document.querySelector<HTMLElement>('[data-filtros]');

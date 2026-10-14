@@ -65,18 +65,21 @@ export const experiencia = [
 		inicio: '2025-10',
 		contexto:
 			'TOTVS Bolivia (Resultar Soluciones SRL) implementa TOTVS Protheus, el ERP de la empresa brasileña TOTVS, en empresas de Bolivia y del exterior.',
-		// Cifras de git, de enero a octubre de 2026 (marca-personal/docs/cifras-resultar.md).
-		cifras: [
-			{ valor: 4, etiqueta: 'empresas cliente' },
-			{ valor: 8, etiqueta: 'programas nuevos' },
-			{ valor: 20, etiqueta: 'archivos fuente modificados' },
-			{ valor: 10, etiqueta: 'correcciones de errores' },
-			{ valor: 1, etiqueta: 'salida en vivo' },
+		// Sin cantidades: Mario pidió no publicar cifras de clientes, programas, archivos ni correcciones (2026-10-14).
+		modulos: [
+			{ codigo: 'SIGAFAT', nombre: 'Facturación' },
+			{ codigo: 'SIGACOM', nombre: 'Compras' },
+		],
+		herramientas: [
+			{ id: 'totvs', nombre: 'TOTVS Protheus' },
+			{ id: 'advpl', nombre: 'AdvPL' },
+			{ id: 'sqlserver', nombre: 'SQL Server' },
+			{ id: 'postgres', nombre: 'PostgreSQL' },
 		],
 		logros: [
-			'Programo en AdvPL y SQL personalizaciones del ERP para 4 empresas cliente: 8 programas nuevos y cambios en otros 20 archivos fuente (reportes, puntos de entrada y rutinas), la mayoría de Facturación.',
-			'Corrijo errores de facturación, cobranza y compras en 3 empresas cliente: 10 correcciones sobre 9 archivos fuente, entre ellas el flujo de facturación con cobranza automática.',
-			'Parametricé el pedido de venta en Facturación (SIGAFAT) y participé en 1 salida en vivo (go-live).',
+			'Programo en AdvPL y SQL personalizaciones del ERP para empresas cliente: programas nuevos, reportes, puntos de entrada y rutinas, sobre todo de Facturación.',
+			'Diagnostico y corrijo errores de facturación, cobranza y compras, algunos frente al cliente; entre ellos, el flujo de facturación con cobranza automática.',
+			'Parametrizo Protheus durante la implementación, sobre todo Facturación (SIGAFAT), donde me encargo del pedido de venta, y en menor medida Compras (SIGACOM). Participé en una salida en vivo (go-live).',
 			'Relevo requerimientos con usuarios de las empresas cliente y traduzco sus procesos a la configuración del sistema, en equipo con consultores senior.',
 		],
 	},
