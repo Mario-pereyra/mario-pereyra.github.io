@@ -14,7 +14,7 @@ aporte:
 demo: https://vintage.marioelprogamer710.workers.dev
 codigo:
   - etiqueta: Código
-    url: https://github.com/Mario-pereyra/vintage
+    url: https://github.com/mario-pereyra/vintage
 ---
 
 ## Contexto

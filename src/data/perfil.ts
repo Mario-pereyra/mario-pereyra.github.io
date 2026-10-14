@@ -13,9 +13,9 @@ export const perfil = {
 	// El correo se arma en el navegador para frenar la recolección automática.
 	correo: { usuario: 'mario1w3p.j', dominio: 'gmail.com' },
 	enlaces: {
-		github: 'https://github.com/Mario-pereyra',
+		github: 'https://github.com/mario-pereyra',
 		linkedin: 'https://www.linkedin.com/in/mario-pereyra-justiniano-86b205304',
-		repositorio: 'https://github.com/Mario-pereyra/mario-pereyra.github.io',
+		repositorio: 'https://github.com/mario-pereyra/mario-pereyra.github.io',
 	},
 	// Versión sin teléfono; se genera en `marca-personal/cv/` y se copia a public/cv/.
 	cv: '/cv/CV_Mario_Pereyra_Justiniano.pdf',

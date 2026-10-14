@@ -10,7 +10,7 @@ aporte:
   - Preparé el entorno completo con Docker Compose, incluida la pasarela de pagos.
 codigo:
   - etiqueta: Código
-    url: https://github.com/Mario-pereyra/Proyecto_Final_Web_02-2025
+    url: https://github.com/mario-pereyra/Proyecto_Final_Web_02-2025
 ---
 
 ## Funcionalidades

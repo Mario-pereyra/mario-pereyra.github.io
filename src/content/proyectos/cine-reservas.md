@@ -8,10 +8,10 @@ stack: [NestJS, TypeORM, PostgreSQL, React, Vite, TypeScript, Docker]
 aporte:
   - Desarrollé el backend en NestJS y el frontend en React dentro de un monorepo.
   - Controlé la concurrencia en la base de datos para evitar la doble reserva de asientos.
-  - Escribí 8 archivos de prueba.
+  - Escribí 7 archivos de prueba.
 codigo:
   - etiqueta: Código
-    url: https://github.com/Mario-pereyra/practico4
+    url: https://github.com/mario-pereyra/practico4
 ---
 
 ## Contexto

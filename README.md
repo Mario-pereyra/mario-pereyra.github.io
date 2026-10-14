@@ -43,6 +43,6 @@ Requiere Node 22.12 o superior.
 
 ## Publicar por primera vez
 
-1. Crea el repo público `Mario-pereyra/mario-pereyra.github.io`. GitHub exige el nombre en minúsculas.
+1. Crea el repo público `mario-pereyra/mario-pereyra.github.io`. GitHub exige el nombre en minúsculas.
 2. Sube el código a `main`, incluido `package-lock.json`: la acción lo usa para detectar el gestor de paquetes.
 3. En Settings → Pages → Source, elige «GitHub Actions».
