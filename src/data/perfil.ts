@@ -14,7 +14,7 @@ export const perfil = {
 	correo: { usuario: 'mario1w3p.j', dominio: 'gmail.com' },
 	enlaces: {
 		github: 'https://github.com/mario-pereyra',
-		linkedin: 'https://www.linkedin.com/in/mario-pereyra-justiniano-86b205304',
+		linkedin: 'https://www.linkedin.com/in/mario-pereyra-justiniano',
 		repositorio: 'https://github.com/mario-pereyra/mario-pereyra.github.io',
 	},
 	// Versión sin teléfono; se genera en `marca-personal/cv/` y se copia a public/cv/.
