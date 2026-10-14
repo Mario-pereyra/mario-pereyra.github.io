@@ -5,7 +5,6 @@ tipo: universidad
 equipo: en equipo de 2
 periodo: Julio de 2026
 orden: 3
-destacado: true
 stack: [NestJS, TypeScript, Sequelize, PostgreSQL, Zod, React, Vite, Leaflet, Docker]
 aporte:
   - Integré la API de TheSportsDB para sincronizar los resultados y cargué 78 partidos reales como datos iniciales.
@@ -17,6 +16,8 @@ codigo:
     url: https://github.com/PabloArauzCaballero/QuinelaMundialeraBackend
   - etiqueta: Frontend
     url: https://github.com/PabloArauzCaballero/QuinelaMundialeraFrontend
+captura: ../../assets/proyectos/quiniela.png
+capturaAlt: Pantalla de inicio de sesión de Quiniela Mundial 2026 en un celular, con un estadio de fondo y el formulario de correo y contraseña.
 ---
 
 ## Contexto

@@ -1,39 +1,262 @@
 ---
-import { perfil } from '../data/perfil';
+import Simbolo from './Simbolo.astro';
 
+const enInicio = Astro.url.pathname === '/';
+const ancla = (id: string) => (enInicio ? `#${id}` : `/#${id}`);
 const secciones = [
-	{ href: '/#sobre-mi', texto: 'Sobre mí' },
-	{ href: '/#experiencia', texto: 'Experiencia' },
-	{ href: '/#proyectos', texto: 'Proyectos' },
-	{ href: '/#habilidades', texto: 'Habilidades' },
-	{ href: '/#contacto', texto: 'Contacto' },
+	{ id: 'sobre-mi', texto: 'sobre mí' },
+	{ id: 'experiencia', texto: 'experiencia' },
+	{ id: 'proyectos', texto: 'proyectos' },
+	{ id: 'stack', texto: 'stack' },
+	{ id: 'contacto', texto: 'contacto' },
 ];
 ---
 
 <header class="cabecera">
-	<div class="contenedor cabecera__interior">
-		<a class="marca" href="/">{perfil.nombreCorto}</a>
-		<nav class="navegacion" aria-label="Principal">
+	<div class="cabecera__fila contenedor">
+		<a class="marca" href="/" aria-label="Mario Pereyra, ir al inicio">
+			<span class="marca__ruta" aria-hidden="true">~/</span><span>mario</span><span class="marca__cursor" aria-hidden="true"></span>
+		</a>
+
+		<nav class="pestanas" aria-label="Secciones">
 			<ul>
 				{
-					secciones.map((seccion) => (
+					secciones.map((s) => (
 						<li>
-							<a href={seccion.href}>{seccion.texto}</a>
+							<a href={ancla(s.id)} data-pestana={s.id}>
+								{s.texto}
+							</a>
 						</li>
 					))
 				}
 			</ul>
 		</nav>
-		<!-- Oculto hasta que cargue el script: sin JavaScript no funcionaría. -->
-		<button class="boton-tema" type="button" data-cambiar-tema aria-pressed="false" hidden>
-			<span class="visualmente-oculto">Tema oscuro</span>
-			<svg class="icono icono--luna" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
-				<path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"></path>
-			</svg>
-			<svg class="icono icono--sol" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
-				<circle cx="12" cy="12" r="4.2" fill="none" stroke="currentColor" stroke-width="1.8"></circle>
-				<path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path>
-			</svg>
-		</button>
+
+		<div class="cabecera__acciones">
+			<button class="atajo" type="button" data-abrir-paleta aria-label="Abrir la paleta de comandos" aria-keyshortcuts="Control+K Meta+K">
+				<Simbolo nombre="buscar" />
+				<span class="atajo__texto">buscar</span>
+				<kbd data-tecla-mod>Ctrl</kbd><kbd>K</kbd>
+			</button>
+			<button class="boton-icono" type="button" data-cambiar-tema aria-label="Cambiar a tema oscuro">
+				<Simbolo nombre="luna" class="tema-luna" />
+				<Simbolo nombre="sol" class="tema-sol" />
+			</button>
+		</div>
 	</div>
 </header>
+
+<style>
+	.cabecera {
+		position: sticky;
+		top: 0;
+		z-index: 40;
+		border-bottom: 1px solid transparent;
+		background: color-mix(in srgb, var(--fondo) 82%, transparent);
+		backdrop-filter: saturate(1.4) blur(10px);
+		-webkit-backdrop-filter: saturate(1.4) blur(10px);
+		transition: border-color 0.2s;
+	}
+
+	:global(html[data-con-scroll]) .cabecera {
+		border-bottom-color: var(--borde);
+	}
+
+	.cabecera__fila {
+		display: flex;
+		align-items: center;
+		gap: 1rem;
+		height: var(--alto-cabecera);
+	}
+
+	.marca {
+		display: inline-flex;
+		align-items: center;
+		min-height: 2.5rem;
+		font-family: var(--mono);
+		font-weight: 600;
+		font-size: 1rem;
+		color: var(--texto);
+		text-decoration: none;
+	}
+
+	.marca__ruta {
+		color: var(--azul);
+	}
+
+	.marca__cursor {
+		width: 0.55em;
+		height: 1.1em;
+		margin-left: 2px;
+		background: var(--rosa);
+	}
+
+	@media (prefers-reduced-motion: no-preference) {
+		.marca__cursor {
+			animation: parpadeo 1.1s steps(1) infinite;
+		}
+	}
+
+	@keyframes parpadeo {
+		50% {
+			opacity: 0;
+		}
+	}
+
+	.pestanas {
+		margin-inline: auto;
+	}
+
+	.pestanas ul {
+		display: flex;
+		gap: 0.25rem;
+		list-style: none;
+	}
+
+	.pestanas a {
+		position: relative;
+		display: inline-flex;
+		align-items: center;
+		min-height: 2.25rem;
+		padding: 0 0.7rem;
+		border-radius: 6px;
+		font-family: var(--mono);
+		font-size: 0.8125rem;
+		color: var(--texto-3);
+		text-decoration: none;
+		transition:
+			color 0.15s,
+			background-color 0.15s;
+	}
+
+	.pestanas a:hover {
+		color: var(--texto);
+		background: var(--fondo-2);
+	}
+
+	.pestanas a[aria-current='true'] {
+		color: var(--texto);
+	}
+
+	.pestanas a[aria-current='true']::after {
+		content: '';
+		position: absolute;
+		left: 0.7rem;
+		right: 0.7rem;
+		bottom: -0.55rem;
+		height: 2px;
+		border-radius: 2px;
+		background: var(--amarillo);
+	}
+
+	.cabecera__acciones {
+		display: flex;
+		align-items: center;
+		gap: 0.4rem;
+		margin-left: auto;
+	}
+
+	.pestanas + .cabecera__acciones {
+		margin-left: 0;
+	}
+
+	.atajo {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.35rem;
+		min-height: 2.5rem;
+		padding: 0 0.5rem 0 0.7rem;
+		border: 1px solid var(--borde);
+		border-radius: var(--radio-chico);
+		background: var(--fondo-2);
+		color: var(--texto-3);
+		font: 0.8125rem var(--mono);
+		cursor: pointer;
+		transition:
+			border-color 0.15s,
+			color 0.15s;
+	}
+
+	.atajo:hover {
+		border-color: var(--borde-fuerte);
+		color: var(--texto);
+	}
+
+	.atajo :global(.simbolo) {
+		width: 0.95rem;
+		height: 0.95rem;
+	}
+
+	.atajo__texto {
+		margin-right: 0.35rem;
+	}
+
+	.boton-icono :global(.tema-sol) {
+		display: none;
+	}
+
+	@media (prefers-color-scheme: dark) {
+		:global(:root:not([data-tema='claro']) .tema-sol) {
+			display: block;
+		}
+		:global(:root:not([data-tema='claro']) .tema-luna) {
+			display: none;
+		}
+	}
+
+	:global(:root[data-tema='oscuro'] .tema-sol) {
+		display: block;
+	}
+
+	:global(:root[data-tema='oscuro'] .tema-luna) {
+		display: none;
+	}
+
+	/* En pantallas chicas las pestañas se van: la paleta hace de menú. */
+	@media (max-width: 52rem) {
+		.pestanas {
+			display: none;
+		}
+		.cabecera__acciones {
+			margin-left: auto !important;
+		}
+	}
+
+	@media (max-width: 30rem) {
+		.atajo kbd {
+			display: none;
+		}
+		.atajo__texto {
+			margin-right: 0.2rem;
+		}
+	}
+
+	@media (hover: none) {
+		.atajo kbd {
+			display: none;
+		}
+		.atajo__texto::after {
+			content: ' / menú';
+		}
+	}
+</style>
+
+<script>
+	import { cambiarTema, temaActual } from '../scripts/acciones';
+
+	const boton = document.querySelector<HTMLButtonElement>('[data-cambiar-tema]');
+	const etiquetar = () => boton?.setAttribute('aria-label', temaActual() === 'oscuro' ? 'Cambiar a tema claro' : 'Cambiar a tema oscuro');
+	boton?.addEventListener('click', () => cambiarTema(boton));
+	document.addEventListener('tema', etiquetar);
+	matchMedia('(prefers-color-scheme: dark)').addEventListener('change', etiquetar);
+	etiquetar();
+
+	// En Mac el atajo es ⌘K.
+	const mac = /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent);
+	if (mac) for (const tecla of document.querySelectorAll('[data-tecla-mod]')) tecla.textContent = '⌘';
+
+	// La cabecera muestra su borde cuando la página ya bajó.
+	const marcarScroll = () => document.documentElement.toggleAttribute('data-con-scroll', scrollY > 8);
+	addEventListener('scroll', marcarScroll, { passive: true });
+	marcarScroll();
+</script>

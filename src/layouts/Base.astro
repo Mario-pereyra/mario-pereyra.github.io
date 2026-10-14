@@ -2,17 +2,22 @@
 import '../styles/global.css';
 import Cabecera from '../components/Cabecera.astro';
 import Pie from '../components/Pie.astro';
+import Estado from '../components/Estado.astro';
+import Paleta from '../components/Paleta.astro';
 import { perfil } from '../data/perfil';
 
 interface Props {
 	titulo: string;
 	descripcion: string;
 	jsonLd?: Record<string, unknown>;
+	// Nombre de «archivo» que muestra la línea de estado mientras no hay una sección visible.
+	archivo?: string;
+	imagen?: string;
 }
 
-const { titulo, descripcion, jsonLd } = Astro.props;
+const { titulo, descripcion, jsonLd, archivo, imagen = '/og.png' } = Astro.props;
 const canonica = new URL(Astro.url.pathname, Astro.site);
-const imagen = new URL('/og.png', Astro.site);
+const urlImagen = new URL(imagen, Astro.site);
 const altImagen = `${perfil.nombre}: ${perfil.rol}`;
 ---
 
@@ -20,16 +25,21 @@ const altImagen = `${perfil.nombre}: ${perfil.rol}`;
 <html lang="es">
 	<head>
 		<meta charset="utf-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 		<meta name="color-scheme" content="light dark" />
+		<meta name="theme-color" media="(prefers-color-scheme: light)" content="#fbf1c7" />
+		<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#1d2021" />
 		<title>{titulo}</title>
 		<meta name="description" content={descripcion} />
+		<meta name="author" content={perfil.nombre} />
 		<link rel="canonical" href={canonica} />
 		<link rel="icon" href="/favicon.ico" sizes="32x32" />
 		<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
 		<link rel="icon" href="/favicon-96.png" sizes="96x96" type="image/png" />
 		<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
 		<link rel="sitemap" href="/sitemap-index.xml" />
+		<link rel="preload" href="/fuentes/Geist-Variable.woff2" as="font" type="font/woff2" crossorigin />
+		<link rel="preload" href="/fuentes/GeistMono-Variable.woff2" as="font" type="font/woff2" crossorigin />
 
 		<meta property="og:type" content="website" />
 		<meta property="og:site_name" content={perfil.nombre} />
@@ -37,15 +47,16 @@ const altImagen = `${perfil.nombre}: ${perfil.rol}`;
 		<meta property="og:title" content={titulo} />
 		<meta property="og:description" content={descripcion} />
 		<meta property="og:url" content={canonica} />
-		<meta property="og:image" content={imagen} />
+		<meta property="og:image" content={urlImagen} />
 		<meta property="og:image:width" content="1200" />
-		<meta property="og:image:height" content="627" />
+		<meta property="og:image:height" content="630" />
 		<meta property="og:image:alt" content={altImagen} />
 		<meta name="twitter:card" content="summary_large_image" />
 		<meta name="generator" content={Astro.generator} />
 
-		<!-- Aplica el tema guardado antes de pintar, para que no parpadee. -->
+		<!-- Antes de pintar: marca que hay JavaScript y aplica el tema guardado, para que no parpadee. -->
 		<script is:inline>
+			document.documentElement.classList.add('js');
 			try {
 				const tema = localStorage.getItem('tema');
 				if (tema === 'claro' || tema === 'oscuro') document.documentElement.dataset.tema = tema;
@@ -60,40 +71,19 @@ const altImagen = `${perfil.nombre}: ${perfil.rol}`;
 			<slot />
 		</main>
 		<Pie />
+		<Estado archivo={archivo} />
+		<Paleta />
+		<span hidden data-correo-usuario={perfil.correo.usuario} data-correo-dominio={perfil.correo.dominio}></span>
 		<script>
-			const raiz = document.documentElement;
-			const oscuroDelSistema = window.matchMedia('(prefers-color-scheme: dark)');
-			const boton = document.querySelector<HTMLButtonElement>('[data-cambiar-tema]');
+			import { copiarCorreo, correo } from '../scripts/acciones';
 
-			function temaActual(): 'claro' | 'oscuro' {
-				const tema = raiz.dataset.tema;
-				if (tema === 'claro' || tema === 'oscuro') return tema;
-				return oscuroDelSistema.matches ? 'oscuro' : 'claro';
-			}
-
-			function actualizarBoton() {
-				boton?.setAttribute('aria-pressed', String(temaActual() === 'oscuro'));
-			}
-
-			if (boton) {
+			// Enlaces y textos de correo: se completan en el navegador.
+			const direccion = correo();
+			for (const enlace of document.querySelectorAll<HTMLAnchorElement>('[data-enlace-correo]')) enlace.href = `mailto:${direccion}`;
+			for (const texto of document.querySelectorAll('[data-texto-correo]')) texto.textContent = direccion;
+			for (const boton of document.querySelectorAll<HTMLButtonElement>('[data-copiar-correo]')) {
 				boton.hidden = false;
-				boton.addEventListener('click', () => {
-					const nuevo = temaActual() === 'oscuro' ? 'claro' : 'oscuro';
-					raiz.dataset.tema = nuevo;
-					try {
-						localStorage.setItem('tema', nuevo);
-					} catch {}
-					actualizarBoton();
-				});
-				oscuroDelSistema.addEventListener('change', actualizarBoton);
-				actualizarBoton();
-			}
-
-			// Arma el correo en el navegador: en el HTML no aparece completo.
-			for (const enlace of document.querySelectorAll<HTMLAnchorElement>('[data-correo-usuario]')) {
-				const direccion = `${enlace.dataset.correoUsuario}@${enlace.dataset.correoDominio}`;
-				enlace.href = `mailto:${direccion}`;
-				for (const texto of document.querySelectorAll('[data-correo-texto]')) texto.textContent = direccion;
+				boton.addEventListener('click', copiarCorreo);
 			}
 		</script>
 	</body>

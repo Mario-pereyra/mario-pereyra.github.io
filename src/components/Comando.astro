@@ -1,0 +1,15 @@
+---
+// La línea de terminal que encabeza una sección. Es decorativa: el título real es el h2 que va debajo.
+interface Props {
+	orden: string;
+	argumento?: string;
+}
+
+const { orden, argumento } = Astro.props;
+---
+
+<p class="comando" aria-hidden="true">
+	<span class="comando__signo">$</span>
+	<span class="comando__orden">{orden}</span>
+	{argumento && <span>{argumento}</span>}
+</p>

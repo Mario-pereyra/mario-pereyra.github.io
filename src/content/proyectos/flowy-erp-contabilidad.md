@@ -5,7 +5,6 @@ tipo: universidad
 equipo: en equipo de 4
 periodo: Junio – julio de 2026
 orden: 4
-destacado: true
 stack: [Node.js, Express, Sequelize, MySQL, Redis, React, Jest, Docker, GitHub Actions]
 aporte:
   - "Desarrollé la etapa 8 del módulo: el dashboard fiscal y los libros de Compras y Ventas (28 archivos)."

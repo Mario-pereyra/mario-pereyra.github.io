@@ -1,0 +1,399 @@
+---
+// El retrato de puntos de la portada. Sin JavaScript se ve la foto; con JavaScript, los puntos,
+// que se apartan del cursor. El botón alterna entre los puntos y la foto.
+import { Image } from 'astro:assets';
+import foto from '../assets/fotos/mario-github.png';
+import { semitono } from '../data/semitono';
+import Simbolo from './Simbolo.astro';
+
+const proporcion = `${semitono.columnas} / ${(semitono.filas * 0.866).toFixed(2)}`;
+---
+
+<figure class="retrato ventana" data-retrato data-vista="puntos">
+	<div class="ventana__barra retrato__barra">
+		<span class="puntos" aria-hidden="true"><i></i><i></i><i></i></span>
+		<span class="ventana__titulo">mario.png</span>
+		<span class="retrato__medida" aria-hidden="true">{semitono.columnas}×{semitono.filas} · semitono</span>
+	</div>
+	<div class="retrato__lienzo" style={`aspect-ratio:${proporcion}`}>
+		<Image
+			class="retrato__foto"
+			src={foto}
+			alt="Mario Pereyra: pelo ondulado castaño, lentes de marco rectangular y camisa negra, con una luz rosa de contorno."
+			widths={[360, 540, 720]}
+			sizes="(min-width: 64rem) 400px, (min-width: 40rem) 60vw, 90vw"
+			loading="eager"
+			fetchpriority="high"
+		/>
+		<canvas class="retrato__puntos" aria-hidden="true"></canvas>
+		<span class="retrato__barrido" aria-hidden="true"></span>
+		<span class="retrato__mira retrato__mira--izq" aria-hidden="true"></span>
+		<span class="retrato__mira retrato__mira--der" aria-hidden="true"></span>
+	</div>
+	<figcaption class="retrato__controles">
+		<span class="retrato__pista" data-pista>mueve el cursor sobre los puntos</span>
+		<button class="retrato__boton" type="button" data-alternar-retrato aria-pressed="false" hidden>
+			<Simbolo nombre="ojo" />
+			<span data-etiqueta>ver foto</span>
+		</button>
+	</figcaption>
+</figure>
+
+<style>
+	.retrato {
+		--fondo-2: var(--foto-fondo);
+		--fondo-3: #1f191b;
+		--borde: #3a2e31;
+		--texto-3: var(--foto-texto);
+		border-color: #3a2e31;
+		background: var(--foto-fondo);
+		color: var(--foto-texto);
+		margin: 0;
+	}
+
+	.retrato__barra {
+		background: #1f191b;
+		border-color: #3a2e31;
+		color: var(--foto-texto);
+	}
+
+	.retrato__medida {
+		font-size: 0.6875rem;
+		opacity: 0.8;
+	}
+
+	.retrato__lienzo {
+		position: relative;
+		overflow: hidden;
+		background: var(--foto-fondo);
+		touch-action: pan-y;
+	}
+
+	.retrato__foto,
+	.retrato__puntos {
+		position: absolute;
+		inset: 0;
+		width: 100%;
+		height: 100%;
+		transition:
+			opacity 0.6s var(--curva),
+			scale 0.8s var(--curva),
+			filter 0.6s;
+	}
+
+	.retrato__foto {
+		object-fit: cover;
+		object-position: 50% 0;
+	}
+
+	/* Empieza en la vista de puntos; sin JavaScript (sin la clase .js en <html>) queda la foto. */
+	:global(html:not(.js)) .retrato__puntos,
+	:global(html:not(.js)) .retrato__barrido {
+		display: none;
+	}
+
+	:global(html:not(.js)) .retrato .retrato__foto {
+		opacity: 1;
+		scale: 1;
+		filter: none;
+	}
+
+	[data-vista='puntos'] .retrato__foto {
+		opacity: 0;
+		scale: 1.04;
+		filter: blur(6px);
+	}
+
+	[data-vista='foto'] .retrato__puntos {
+		opacity: 0;
+		scale: 0.97;
+	}
+
+	.retrato__barrido {
+		position: absolute;
+		inset-inline: 0;
+		top: 0;
+		height: 18%;
+		background: linear-gradient(to bottom, transparent, rgb(255 176 182 / 0.12) 70%, rgb(255 176 182 / 0.35) 100%, transparent);
+		pointer-events: none;
+		opacity: 0;
+	}
+
+	@media (prefers-reduced-motion: no-preference) {
+		[data-vista='puntos'] .retrato__barrido {
+			animation: barrido 7s ease-in-out 1.6s infinite;
+		}
+	}
+
+	@keyframes barrido {
+		0% {
+			translate: 0 -100%;
+			opacity: 0;
+		}
+		8% {
+			opacity: 1;
+		}
+		55% {
+			translate: 0 560%;
+			opacity: 1;
+		}
+		60%,
+		100% {
+			translate: 0 560%;
+			opacity: 0;
+		}
+	}
+
+	.retrato__mira {
+		position: absolute;
+		top: 14px;
+		width: 18px;
+		height: 18px;
+		opacity: 0.7;
+		pointer-events: none;
+		background:
+			linear-gradient(var(--foto-punto), var(--foto-punto)) center / 1px 100% no-repeat,
+			linear-gradient(var(--foto-punto), var(--foto-punto)) center / 100% 1px no-repeat;
+	}
+
+	.retrato__mira::after {
+		content: '';
+		position: absolute;
+		inset: 5px;
+		border: 1px solid var(--foto-punto);
+		border-radius: 50%;
+	}
+
+	.retrato__mira--izq {
+		left: 14px;
+	}
+
+	.retrato__mira--der {
+		right: 14px;
+	}
+
+	.retrato__controles {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 0.75rem;
+		min-height: 2.75rem;
+		padding: 0.4rem 0.5rem 0.4rem 0.9rem;
+		border-top: 1px solid #3a2e31;
+		font-family: var(--mono);
+		font-size: 0.75rem;
+		color: var(--foto-texto);
+	}
+
+	.retrato__boton {
+		display: inline-flex;
+		flex: none;
+		white-space: nowrap;
+		align-items: center;
+		gap: 0.45rem;
+		min-height: 2rem;
+		padding: 0.25rem 0.7rem;
+		border: 1px solid #4a3a3e;
+		border-radius: 6px;
+		background: #1f191b;
+		color: #f3dfe2;
+		font: inherit;
+		cursor: pointer;
+		transition:
+			border-color 0.15s,
+			color 0.15s;
+	}
+
+	.retrato__boton:hover {
+		border-color: var(--foto-punto);
+		color: #fff;
+	}
+
+	.retrato__boton :global(.simbolo) {
+		width: 1rem;
+		height: 1rem;
+	}
+
+	.retrato__boton:focus-visible {
+		outline-color: var(--foto-brillo);
+	}
+</style>
+
+<script>
+	import { semitono } from '../data/semitono';
+
+	const RADIO = 90; // alcance del cursor, en píxeles CSS
+	const EMPUJE = 0.42; // cuánto se apartan los puntos, como fracción del radio
+
+	function iniciar(figura: HTMLElement) {
+		const lienzo = figura.querySelector('canvas')!;
+		const contexto = lienzo.getContext('2d');
+		if (!contexto) return;
+		const ctx: CanvasRenderingContext2D = contexto;
+		const boton = figura.querySelector<HTMLButtonElement>('[data-alternar-retrato]')!;
+		const etiqueta = boton.querySelector('[data-etiqueta]')!;
+		const pista = figura.querySelector<HTMLElement>('[data-pista]')!;
+		const estilo = getComputedStyle(figura);
+		const colorPunto = estilo.getPropertyValue('--foto-punto').trim() || '#e8616e';
+		const colorBrillo = estilo.getPropertyValue('--foto-brillo').trim() || '#ffb0b6';
+		const quieto = matchMedia('(prefers-reduced-motion: reduce)');
+		const tactil = matchMedia('(hover: none)');
+
+		// Puntos en coordenadas de la grilla: columna, fila (ya escalada a 0,866) y nivel.
+		const { columnas, filas, niveles } = semitono;
+		const gx: number[] = [];
+		const gy: number[] = [];
+		const nv: number[] = [];
+		for (let f = 0; f < filas; f++) {
+			for (let c = 0; c < columnas; c++) {
+				const n = niveles.charCodeAt(f * columnas + c) - 48;
+				if (n <= 0) continue;
+				gx.push(c + (f % 2 ? 1 : 0.5));
+				gy.push(f * 0.866 + 0.5);
+				nv.push(n);
+			}
+		}
+
+		let ancho = 0;
+		let alto = 0;
+		let paso = 0;
+		const puntero = { x: -9999, y: -9999, fx: -9999, fy: -9999, fuerza: 0, dentro: false };
+		let aparicion = quieto.matches ? 1 : 0; // 0 → 1: los puntos aparecen de arriba abajo
+		let cuadro = 0;
+		let visible = true;
+
+		function medir() {
+			const caja = lienzo.getBoundingClientRect();
+			const dpr = Math.min(window.devicePixelRatio || 1, 2);
+			ancho = caja.width;
+			alto = caja.height;
+			paso = ancho / columnas;
+			lienzo.width = Math.round(ancho * dpr);
+			lienzo.height = Math.round(alto * dpr);
+			ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+		}
+
+		function dibujar() {
+			ctx.clearRect(0, 0, ancho, alto);
+			const limite = aparicion * (alto + 40);
+			const radioMax = paso * 0.47;
+			const { fx, fy, fuerza } = puntero;
+			const r2 = RADIO * RADIO;
+			const capas: [string, number][] = [
+				[colorPunto, 8],
+				[colorBrillo, 9],
+			];
+			for (const [color, nivelCapa] of capas) {
+				ctx.beginPath();
+				for (let i = 0; i < nv.length; i++) {
+					const n = nv[i];
+					if (nivelCapa === 9 ? n !== 9 : n === 9) continue;
+					let x = gx[i] * paso;
+					let y = gy[i] * paso;
+					if (y > limite) continue;
+					let r = radioMax * Math.sqrt(n / 9);
+					if (fuerza > 0.001) {
+						const dx = x - fx;
+						const dy = y - fy;
+						const d2 = dx * dx + dy * dy;
+						if (d2 < r2) {
+							const d = Math.sqrt(d2) || 1;
+							const k = (1 - d / RADIO) ** 2 * fuerza;
+							x += (dx / d) * k * RADIO * EMPUJE;
+							y += (dy / d) * k * RADIO * EMPUJE;
+							r *= 1 + k * 0.5;
+						}
+					}
+					// Los puntos que acaban de aparecer crecen desde cero.
+					const borde = limite - y;
+					if (borde < 40) r *= Math.max(0, borde / 40);
+					ctx.moveTo(x + r, y);
+					ctx.arc(x, y, r, 0, Math.PI * 2);
+				}
+				ctx.fillStyle = color;
+				ctx.fill();
+			}
+		}
+
+		function paso_animacion() {
+			cuadro = 0;
+			let seguir = false;
+			if (aparicion < 1) {
+				aparicion = Math.min(1, aparicion + 0.018);
+				seguir = true;
+			}
+			// El punto de influencia sigue al cursor con suavidad, y la fuerza sube o baja.
+			puntero.fx += (puntero.x - puntero.fx) * 0.2;
+			puntero.fy += (puntero.y - puntero.fy) * 0.2;
+			const objetivo = puntero.dentro ? 1 : 0;
+			puntero.fuerza += (objetivo - puntero.fuerza) * 0.1;
+			if (Math.abs(objetivo - puntero.fuerza) > 0.002) seguir = true;
+			if (puntero.dentro && (Math.abs(puntero.x - puntero.fx) > 0.3 || Math.abs(puntero.y - puntero.fy) > 0.3)) seguir = true;
+			dibujar();
+			if (seguir && visible) pedirCuadro();
+		}
+
+		function pedirCuadro() {
+			if (!cuadro) cuadro = requestAnimationFrame(paso_animacion);
+		}
+
+		function moverPuntero(evento: PointerEvent) {
+			if (quieto.matches || figura.dataset.vista !== 'puntos') return;
+			const caja = lienzo.getBoundingClientRect();
+			puntero.x = evento.clientX - caja.left;
+			puntero.y = evento.clientY - caja.top;
+			if (!puntero.dentro) {
+				puntero.fx = puntero.x;
+				puntero.fy = puntero.y;
+			}
+			puntero.dentro = true;
+			pista.textContent = tactil.matches ? 'toca y arrastra sobre los puntos' : 'sigue moviéndolo…';
+			pedirCuadro();
+		}
+
+		function salir() {
+			puntero.dentro = false;
+			pedirCuadro();
+		}
+
+		const zona = lienzo.parentElement!;
+		zona.addEventListener('pointermove', moverPuntero);
+		zona.addEventListener('pointerdown', moverPuntero);
+		zona.addEventListener('pointerleave', salir);
+		zona.addEventListener('pointerup', (e) => e.pointerType !== 'mouse' && salir());
+		zona.addEventListener('pointercancel', salir);
+
+		boton.addEventListener('click', () => {
+			const foto = figura.dataset.vista === 'puntos';
+			figura.dataset.vista = foto ? 'foto' : 'puntos';
+			boton.setAttribute('aria-pressed', String(foto));
+			etiqueta.textContent = foto ? 'ver puntos' : 'ver foto';
+			if (!foto) {
+				aparicion = quieto.matches ? 1 : 0;
+				pedirCuadro();
+			}
+		});
+
+		new ResizeObserver(() => {
+			medir();
+			dibujar();
+		}).observe(lienzo);
+
+		// Fuera de la pantalla no se anima.
+		new IntersectionObserver(([entrada]) => {
+			visible = entrada.isIntersecting;
+			if (visible) pedirCuadro();
+		}).observe(figura);
+
+		pista.textContent = quieto.matches
+			? 'retrato de puntos'
+			: tactil.matches
+				? 'toca y arrastra sobre los puntos'
+				: 'mueve el cursor sobre los puntos';
+		boton.hidden = false;
+		medir();
+		pedirCuadro();
+	}
+
+	for (const figura of document.querySelectorAll<HTMLElement>('[data-retrato]')) iniciar(figura);
+</script>

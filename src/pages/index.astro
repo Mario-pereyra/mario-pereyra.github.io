@@ -1,13 +1,24 @@
 ---
 import { getCollection } from 'astro:content';
 import Base from '../layouts/Base.astro';
+import Comando from '../components/Comando.astro';
+import Icono from '../components/Icono.astro';
+import Retrato from '../components/Retrato.astro';
+import Simbolo from '../components/Simbolo.astro';
 import TarjetaProyecto from '../components/TarjetaProyecto.astro';
-import Enlaces from '../components/EnlacesProyecto.astro';
-import { perfil, pilares, experiencia, formacion, habilidades, tiposDeProyecto } from '../data/perfil';
+import { ahoraMismo, aprendiendo, experiencia, ficha, formacion, idiomas, perfil, rumbo, sobreMi, tiposDeProyecto } from '../data/perfil';
+import { areas, enAprendizaje, yaManejo } from '../data/stack';
 
 const proyectos = (await getCollection('proyectos')).sort((a, b) => a.data.orden - b.data.orden);
-const destacados = proyectos.filter((proyecto) => proyecto.data.destacado);
-const otros = proyectos.filter((proyecto) => !proyecto.data.destacado);
+const conteo = (tipo: string) => proyectos.filter((p) => p.data.tipo === tipo).length;
+const filtros = [
+	{ valor: 'todos', texto: 'todos', n: proyectos.length },
+	...(['personal', 'familiar', 'universidad'] as const).map((t) => ({ valor: t, texto: tiposDeProyecto[t].toLowerCase(), n: conteo(t) })),
+].filter((f) => f.n > 0);
+
+// Las negritas de los textos (**así**) pasan a <strong>. Los textos son propios, no vienen del usuario.
+const negritas = (texto: string) => texto.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+const trabajo = experiencia[0];
 
 const jsonLd = {
 	'@context': 'https://schema.org',
@@ -16,13 +27,15 @@ const jsonLd = {
 	mainEntity: {
 		'@type': 'Person',
 		name: perfil.nombre,
+		alternateName: perfil.nombreCorto,
 		url: Astro.site?.href,
+		image: new URL('/og.png', Astro.site).href,
 		description: perfil.descripcion,
 		jobTitle: 'Consultor TOTVS Protheus',
-		worksFor: { '@type': 'Organization', name: 'Resultar Soluciones SRL' },
-		affiliation: { '@type': 'CollegeOrUniversity', name: 'Universidad NUR' },
+		worksFor: { '@type': 'Organization', name: 'TOTVS Bolivia', legalName: 'Resultar Soluciones SRL' },
+		alumniOf: { '@type': 'CollegeOrUniversity', name: 'Universidad NUR' },
 		address: { '@type': 'PostalAddress', addressLocality: 'Santa Cruz de la Sierra', addressCountry: 'BO' },
-		knowsAbout: ['TypeScript', 'React', 'Node.js', 'SQL', 'AdvPL', 'TOTVS Protheus', 'Model Context Protocol'],
+		knowsAbout: ['TypeScript', 'Node.js', 'React', 'SQL', 'AdvPL', 'TOTVS Protheus', 'Model Context Protocol', 'Agentes de IA'],
 		knowsLanguage: ['es', 'en'],
 		sameAs: [perfil.enlaces.github, perfil.enlaces.linkedin],
 	},
@@ -30,128 +43,245 @@ const jsonLd = {
 ---
 
 <Base titulo={`${perfil.nombre} · Desarrollador`} descripcion={perfil.descripcion} jsonLd={jsonLd}>
-	<section class="portada contenedor" aria-labelledby="titulo-portada">
-		<p class="etiqueta">{perfil.ubicacion}</p>
-		<h1 id="titulo-portada">{perfil.nombre}</h1>
-		<p class="portada__rol">{perfil.rol}</p>
-		<p class="portada__intro">{perfil.presentacion}</p>
-		<div class="acciones">
-			<a class="boton boton--principal" href="#proyectos">Ver proyectos</a>
-			<a class="boton" href={perfil.cv} download>Descargar CV</a>
-		</div>
-		<ul class="enlaces-sociales">
-			<li><a href={perfil.enlaces.github}>GitHub</a></li>
-			<li><a href={perfil.enlaces.linkedin}>LinkedIn</a></li>
-		</ul>
-	</section>
-
-	<section class="seccion" id="sobre-mi" aria-labelledby="titulo-sobre-mi">
-		<div class="contenedor">
-			<h2 class="seccion__titulo" id="titulo-sobre-mi">Sobre mí</h2>
-			<div class="texto">
-				<p>
-					Soy desarrollador y estudio Ingeniería de Sistemas en la Universidad NUR. Desde octubre de 2025 trabajo en Resultar
-					Soluciones SRL, donde programo en AdvPL y SQL personalizaciones del ERP TOTVS Protheus para empresas cliente y relevo
-					sus procesos con los usuarios. Por mi cuenta construyo aplicaciones web con TypeScript, React y Node.js, y herramientas
-					de IA aplicada.
+	<!-- Portada -->
+	<section class="portada" id="inicio" data-archivo="inicio.md" aria-labelledby="titulo-portada">
+		<div class="contenedor portada__rejilla">
+			<div class="portada__texto">
+				<p class="portada__prompt" aria-hidden="true">
+					<span class="c-verde">mario@santa-cruz</span><span class="c-tenue">:</span><span class="c-azul">~</span><span
+						class="c-tenue">$</span
+					> whoami
 				</p>
-				<p>
-					Mi norte de aprendizaje es el rol de Forward Deployed Engineer: trabajar junto al cliente para llevar un producto
-					a producción dentro de sus procesos.
+				<h1 id="titulo-portada" class="portada__nombre">
+					<span>Mario Alberto</span>
+					<span class="portada__apellido">Pereyra Justiniano</span>
+				</h1>
+				<p class="portada__rol">{perfil.rol}</p>
+				<p class="portada__intro">{perfil.presentacion}</p>
+				<p class="portada__ahora">
+					<span class="c-azul">ahora</span><span class="c-tenue">:</span>{' '}
+					<span class="escribe" style={`--letras:${perfil.ahora.length}`}>{perfil.ahora}</span><span class="cursor" aria-hidden="true"
+					></span>
 				</p>
+				<div class="acciones portada__acciones">
+					<a class="boton boton--principal" href="#proyectos">Ver proyectos <Simbolo nombre="flecha" /></a>
+					<a class="boton" href={perfil.cv} download><Simbolo nombre="descargar" /> Descargar CV</a>
+					<span class="portada__redes">
+						<a class="boton-icono" href={perfil.enlaces.github} aria-label="GitHub" rel="me noopener"><Simbolo nombre="github" /></a>
+						<a class="boton-icono" href={perfil.enlaces.linkedin} aria-label="LinkedIn" rel="me noopener"><Simbolo nombre="linkedin" /></a>
+					</span>
+				</div>
+				<p class="disponible"><span class="disponible__punto" aria-hidden="true"></span> Abierto a oportunidades como desarrollador backend o full stack</p>
 			</div>
-			<ul class="pilares">
-				{
-					pilares.map((pilar) => (
-						<li class="tarjeta">
-							<h3>{pilar.titulo}</h3>
-							<p>{pilar.texto}</p>
-						</li>
-					))
-				}
-			</ul>
-		</div>
-	</section>
-
-	<section class="seccion" id="experiencia" aria-labelledby="titulo-experiencia">
-		<div class="contenedor">
-			<h2 class="seccion__titulo" id="titulo-experiencia">Experiencia</h2>
-			{
-				experiencia.map((puesto) => (
-					<article class="entrada">
-						<div class="entrada__cabecera">
-							<div>
-								<h3>{puesto.puesto}</h3>
-								<p class="entrada__organizacion">{puesto.organizacion}</p>
-							</div>
-							<p class="entrada__fecha">
-								{puesto.periodo}
-								<br />
-								{puesto.lugar}
-							</p>
-						</div>
-						<p class="entrada__contexto">{puesto.contexto}</p>
-						<ul class="lista">
-							{puesto.logros.map((logro) => (
-								<li>{logro}</li>
-							))}
-						</ul>
-					</article>
-				))
-			}
-		</div>
-	</section>
-
-	<section class="seccion" id="proyectos" aria-labelledby="titulo-proyectos">
-		<div class="contenedor">
-			<h2 class="seccion__titulo" id="titulo-proyectos">Proyectos</h2>
-			<div class="proyectos">
-				{destacados.map((proyecto) => <TarjetaProyecto proyecto={proyecto} />)}
+			<div class="portada__retrato">
+				<Retrato />
 			</div>
-			<h3 class="subtitulo">Otros proyectos</h3>
-			<ul class="otros">
-				{
-					otros.map((proyecto) => (
-						<li class="otro">
-							<div>
-								<a class="otro__titulo" href={`/proyectos/${proyecto.id}/`}>
-									{proyecto.data.titulo}
-								</a>
-								<span class="otro__meta">
-									{tiposDeProyecto[proyecto.data.tipo]} · {proyecto.data.periodo}
+		</div>
+
+		<div class="contenedor">
+			<dl class="ficha ventana" aria-label="Datos rápidos">
+				<div class="ventana__barra ficha__barra" aria-hidden="true">
+					<span class="puntos"><i></i><i></i><i></i></span>
+					<span class="ventana__titulo">mario.yml</span>
+				</div>
+				<div class="ficha__filas">
+					{
+						ficha.map(([clave, valor, nota], i) => (
+							<div class="ficha__fila">
+								<span class="ficha__linea" aria-hidden="true">
+									{i + 1}
 								</span>
+								<dt>
+									{clave}
+									<span class="c-tenue" aria-hidden="true">
+										:
+									</span>
+								</dt>
+								<dd>
+									{valor}
+									{nota && <span class="ficha__nota"># {nota}</span>}
+								</dd>
 							</div>
-							<p>{proyecto.data.resumen}</p>
-							<Enlaces proyecto={proyecto} />
+						))
+					}
+				</div>
+			</dl>
+		</div>
+	</section>
+
+	<!-- Sobre mí -->
+	<section class="seccion" id="sobre-mi" data-archivo="sobre-mi.md" aria-labelledby="titulo-sobre-mi">
+		<div class="contenedor sobre">
+			<div class="sobre__texto revelar">
+				<Comando orden="cat" argumento="sobre-mi.md" />
+				<h2 class="seccion__titulo" id="titulo-sobre-mi">Sobre mí</h2>
+				{sobreMi.map((parrafo) => <p set:html={negritas(parrafo)} />)}
+				<div class="rumbo">
+					<p class="rumbo__clave"><span class="c-tenue">$</span> echo $RUMBO</p>
+					<p>{rumbo}</p>
+				</div>
+			</div>
+
+			<aside class="ventana aprendo revelar" aria-labelledby="titulo-aprendo">
+				<div class="ventana__barra">
+					<span class="puntos" aria-hidden="true"><i></i><i></i><i></i></span>
+					<span class="ventana__titulo">aprendiendo.md</span>
+				</div>
+				<div class="aprendo__cuerpo">
+					<h3 id="titulo-aprendo" class="aprendo__titulo"><span class="c-tenue" aria-hidden="true">#</span> Lo que estoy aprendiendo</h3>
+					<ol class="aprendo__lista">
+						{
+							aprendiendo.map((punto) => (
+								<li>
+									<strong>{punto.titulo}:</strong> {punto.texto}
+								</li>
+							))
+						}
+					</ol>
+					<p class="aprendo__ahora">
+						<span class="aprendo__marca">ahora mismo</span>
+						{ahoraMismo}
+					</p>
+				</div>
+			</aside>
+		</div>
+	</section>
+
+	<!-- Experiencia -->
+	<section class="seccion seccion--banda" id="experiencia" data-archivo="experiencia.md" aria-labelledby="titulo-experiencia">
+		<div class="contenedor">
+			<header class="seccion__cabecera revelar">
+				<Comando orden="git log" argumento='--author="mario"' />
+				<h2 class="seccion__titulo" id="titulo-experiencia">Experiencia</h2>
+			</header>
+
+			<article class="trabajo ventana revelar">
+				<div class="ventana__barra">
+					<span class="puntos" aria-hidden="true"><i></i><i></i><i></i></span>
+					<span class="ventana__titulo">{trabajo.organizacion.toLowerCase().replace(' ', '-')} · desde {trabajo.inicio}</span>
+					<span class="trabajo__head" aria-hidden="true">HEAD → main</span>
+				</div>
+				<div class="trabajo__cuerpo">
+					<div class="trabajo__cabecera">
+						<div>
+							<h3 class="trabajo__puesto">{trabajo.puesto}</h3>
+							<p class="trabajo__empresa">
+								{trabajo.organizacion} <span class="c-tenue">({trabajo.razonSocial})</span>
+							</p>
+						</div>
+						<p class="trabajo__fecha">
+							<span>{trabajo.periodo}</span>
+							<span>{trabajo.lugar}</span>
+						</p>
+					</div>
+					<p class="trabajo__contexto">{trabajo.contexto}</p>
+
+					<ul class="cifras" aria-label="El puesto en cifras">
+						{
+							trabajo.cifras.map((c) => (
+								<li class="cifra">
+									<span class="cifra__valor" data-cifra={c.valor}>
+										{c.valor}
+									</span>
+									<span class="cifra__etiqueta">{c.etiqueta}</span>
+								</li>
+							))
+						}
+					</ul>
+					<p class="cifras__nota">Las cifras de código salen de git, de enero a octubre de 2026.</p>
+
+					<ul class="diff">
+						{trabajo.logros.map((logro) => <li>{logro}</li>)}
+					</ul>
+				</div>
+			</article>
+		</div>
+	</section>
+
+	<!-- Proyectos -->
+	<section class="seccion" id="proyectos" data-archivo="proyectos/" aria-labelledby="titulo-proyectos">
+		<div class="contenedor">
+			<header class="seccion__cabecera proyectos__cabecera revelar">
+				<div>
+					<Comando orden="ls" argumento="~/proyectos" />
+					<h2 class="seccion__titulo" id="titulo-proyectos">Proyectos</h2>
+					<p class="seccion__bajada">Lo que construí por mi cuenta, para el emprendimiento de mi familia y en la universidad. En los de equipo cuento solo mi parte.</p>
+				</div>
+				<div class="filtros" role="group" aria-label="Filtrar proyectos" data-filtros hidden>
+					{
+						filtros.map((f, i) => (
+							<button type="button" class="filtro" data-filtro={f.valor} aria-pressed={i === 0 ? 'true' : 'false'}>
+								{f.texto} <span class="filtro__n">{f.n}</span>
+							</button>
+						))
+					}
+				</div>
+			</header>
+			<ul class="proyectos" data-proyectos>
+				{
+					proyectos.map((p) => (
+						<li data-tipo={p.data.tipo} data-id={p.id}>
+							<TarjetaProyecto proyecto={p} />
 						</li>
 					))
 				}
 			</ul>
+			<p class="visualmente-oculto" role="status" data-filtro-estado></p>
 		</div>
 	</section>
 
-	<section class="seccion" id="habilidades" aria-labelledby="titulo-habilidades">
+	<!-- Stack -->
+	<section class="seccion seccion--banda" id="stack" data-archivo="stack.yaml" aria-labelledby="titulo-stack">
 		<div class="contenedor">
-			<h2 class="seccion__titulo" id="titulo-habilidades">Habilidades</h2>
-			<div class="habilidades">
+			<header class="seccion__cabecera revelar">
+				<Comando orden="cat" argumento="stack.yaml" />
+				<h2 class="seccion__titulo" id="titulo-stack">Stack</h2>
+				<p class="seccion__bajada">
+					<code class="c-verde">ya_manejo</code> es nivel intermedio o avanzado; <code class="c-amarillo">aprendiendo</code>, básico. Pasa
+					el cursor o enfoca un ícono para ver su nombre y nivel.
+				</p>
+			</header>
+
+			<div class="stack ventana revelar" role="table" aria-label="Tecnologías por área y nivel">
+				<div class="stack__fila stack__fila--titulos" role="row">
+					<span role="columnheader"><span class="visualmente-oculto">Área</span></span>
+					<span role="columnheader" class="c-verde">ya_manejo:</span>
+					<span role="columnheader" class="c-amarillo">aprendiendo:</span>
+				</div>
 				{
-					habilidades.map((grupo) => (
-						<div class="habilidades__grupo">
-							<h3>{grupo.grupo}</h3>
-							<dl class="niveles">
-								{grupo.niveles.map(({ nivel, items }) => (
-									<div class="nivel">
-										<dt>{nivel}</dt>
-										<dd>
-											<ul class="chips">
-												{items.map((item) => (
-													<li class="chip">{item}</li>
-												))}
-											</ul>
-										</dd>
-									</div>
-								))}
-							</dl>
+					areas.map((a) => (
+						<div class="stack__fila" role="row">
+							<span class="stack__area" role="rowheader">
+								{a.area}
+								<span class="c-tenue">:</span>
+							</span>
+							<div role="cell" class="stack__celda" data-titulo="ya_manejo">
+								<ul class="iconos">
+									{yaManejo(a.items).map((i) => (
+										<li>
+											<Icono id={i.id} nombre={i.nombre} nivel={i.nivel} />
+										</li>
+									))}
+								</ul>
+							</div>
+							<div role="cell" class="stack__celda" data-titulo="aprendiendo">
+								{enAprendizaje(a.items).length > 0 && (
+									<ul class="iconos">
+										{enAprendizaje(a.items).map((i) => (
+											<li>
+												<Icono id={i.id} nombre={i.nombre} nivel={i.nivel} />
+											</li>
+										))}
+									</ul>
+								)}
+								{a.conceptos && (
+									<ul class="chips">
+										{a.conceptos.map((c) => (
+											<li class="chip">{c}</li>
+										))}
+									</ul>
+								)}
+							</div>
 						</div>
 					))
 				}
@@ -159,50 +289,903 @@ const jsonLd = {
 		</div>
 	</section>
 
-	<section class="seccion" id="formacion" aria-labelledby="titulo-formacion">
+	<!-- Formación -->
+	<section class="seccion" id="formacion" data-archivo="formacion.md" aria-labelledby="titulo-formacion">
 		<div class="contenedor">
-			<h2 class="seccion__titulo" id="titulo-formacion">Formación</h2>
-			{
-				formacion.map((estudio) => (
-					<article class="entrada">
-						<div class="entrada__cabecera">
-							<div>
-								<h3>{estudio.institucion}</h3>
-								<p class="entrada__organizacion">{estudio.titulo}</p>
-							</div>
-							<p class="entrada__fecha">
-								{estudio.periodo}
-								<br />
-								{estudio.lugar}
-							</p>
-						</div>
-						<p class="entrada__contexto">{estudio.detalle}</p>
-					</article>
-				))
-			}
+			<header class="seccion__cabecera revelar">
+				<Comando orden="cat" argumento="formacion.md" />
+				<h2 class="seccion__titulo" id="titulo-formacion">Formación</h2>
+			</header>
+			<div class="formacion">
+				<article class="bloque bloque--ancho revelar">
+					<p class="bloque__meta">{formacion.lugar}</p>
+					<h3>{formacion.titulo}</h3>
+					<p class="bloque__sub">{formacion.institucion} · {formacion.estado}</p>
+					<p class="bloque__egreso">{formacion.egreso}</p>
+					<p class="bloque__grado"><strong>Proyecto de grado (en curso):</strong> {formacion.proyectoDeGrado}</p>
+				</article>
+				<article class="bloque revelar">
+					<p class="bloque__meta">idiomas</p>
+					<h3>Idiomas</h3>
+					<dl class="idiomas">
+						{
+							idiomas.map((i) => (
+								<div>
+									<dt>{i.idioma}</dt>
+									<dd>{i.nivel}</dd>
+								</div>
+							))
+						}
+					</dl>
+				</article>
+			</div>
 		</div>
 	</section>
 
-	<section class="seccion seccion--contacto" id="contacto" aria-labelledby="titulo-contacto">
-		<div class="contenedor">
-			<h2 class="seccion__titulo" id="titulo-contacto">Contacto</h2>
-			<p class="texto">
-				Si buscas un desarrollador backend o full stack, o alguien para proyectos donde la tecnología se implementa junto al cliente, escríbeme.
-			</p>
-			<div class="acciones">
-				<a
-					class="boton boton--principal"
-					href="#contacto"
-					data-correo-usuario={perfil.correo.usuario}
-					data-correo-dominio={perfil.correo.dominio}>Escribir un correo</a
-				>
-				<a class="boton" href={perfil.cv} download>Descargar CV</a>
-				<a class="boton" href={perfil.enlaces.linkedin}>LinkedIn</a>
-				<a class="boton" href={perfil.enlaces.github}>GitHub</a>
+	<!-- Contacto -->
+	<section class="seccion contacto" id="contacto" data-archivo="contactar.sh" aria-labelledby="titulo-contacto">
+		<div class="contenedor contacto__rejilla">
+			<div class="revelar">
+				<Comando orden="./contactar.sh" />
+				<h2 class="seccion__titulo contacto__titulo" id="titulo-contacto">¿Hablamos?</h2>
+				<p class="contacto__texto">
+					Estoy abierto a oportunidades como desarrollador backend o full stack. Si tu equipo cuida las buenas prácticas y trabaja cerca del
+					cliente, me encantaría conversar.
+				</p>
+				<div class="acciones">
+					<a class="boton boton--principal" href={perfil.enlaces.linkedin} data-enlace-correo><Simbolo nombre="correo" /> Escribirme un correo</a>
+					<a class="boton" href={perfil.cv} download><Simbolo nombre="descargar" /> Descargar CV</a>
+				</div>
 			</div>
-			<p class="nota">
-				Correo: <span data-correo-texto>se muestra con JavaScript activado; también puedes escribirme por LinkedIn</span>.
-			</p>
+
+			<div class="ventana terminal revelar">
+				<div class="ventana__barra">
+					<span class="puntos" aria-hidden="true"><i></i><i></i><i></i></span>
+					<span class="ventana__titulo">zsh · contactar.sh</span>
+				</div>
+				<dl class="terminal__cuerpo">
+					<div class="terminal__fila">
+						<dt><span class="c-verde" aria-hidden="true">→ </span>correo</dt>
+						<dd>
+							<a data-enlace-correo href={perfil.enlaces.linkedin}
+								><span data-texto-correo>se muestra con JavaScript; también puedes escribirme por LinkedIn</span></a
+							>
+							<button class="copiar" type="button" data-copiar-correo hidden aria-label="Copiar el correo">
+								<Simbolo nombre="copiar" />
+							</button>
+						</dd>
+					</div>
+					<div class="terminal__fila">
+						<dt><span class="c-verde" aria-hidden="true">→ </span>linkedin</dt>
+						<dd><a href={perfil.enlaces.linkedin} rel="me noopener">in/mario-pereyra-justiniano</a></dd>
+					</div>
+					<div class="terminal__fila">
+						<dt><span class="c-verde" aria-hidden="true">→ </span>github</dt>
+						<dd><a href={perfil.enlaces.github} rel="me noopener">mario-pereyra</a></dd>
+					</div>
+					<div class="terminal__fila">
+						<dt><span class="c-verde" aria-hidden="true">→ </span>cv</dt>
+						<dd><a href={perfil.cv} download>CV_Mario_Pereyra_Justiniano.pdf</a></dd>
+					</div>
+					<div class="terminal__fila">
+						<dt><span class="c-verde" aria-hidden="true">→ </span>base</dt>
+						<dd>{perfil.ubicacion} <span class="c-tenue">(UTC−4)</span></dd>
+					</div>
+				</dl>
+				<p class="terminal__fin" aria-hidden="true"><span class="c-tenue">$</span> <span class="cursor"></span></p>
+			</div>
 		</div>
 	</section>
 </Base>
+
+<style>
+	/* Colores de sintaxis */
+	.c-verde {
+		color: var(--verde);
+	}
+	.c-azul {
+		color: var(--azul);
+	}
+	.c-amarillo {
+		color: var(--amarillo);
+	}
+	.c-tenue {
+		color: var(--texto-3);
+	}
+
+	.cursor {
+		display: inline-block;
+		width: 0.6em;
+		height: 1.15em;
+		margin-left: 2px;
+		vertical-align: -0.2em;
+		background: var(--rosa);
+	}
+
+	@media (prefers-reduced-motion: no-preference) {
+		.cursor {
+			animation: parpadeo 1.1s steps(1) infinite;
+		}
+	}
+
+	@keyframes parpadeo {
+		50% {
+			opacity: 0;
+		}
+	}
+
+	/* ---------- Portada ---------- */
+
+	.portada {
+		padding-block: clamp(2.5rem, 7vw, 5.5rem) clamp(3rem, 6vw, 4.5rem);
+	}
+
+	.portada__rejilla {
+		display: grid;
+		gap: clamp(2.5rem, 6vw, 4.5rem);
+		align-items: center;
+	}
+
+	@media (min-width: 60rem) {
+		.portada__rejilla {
+			grid-template-columns: minmax(0, 1.25fr) minmax(0, 0.85fr);
+		}
+	}
+
+	.portada__prompt {
+		margin-bottom: 1.1rem;
+		font-family: var(--mono);
+		font-size: 0.9375rem;
+	}
+
+	.portada__nombre {
+		display: flex;
+		flex-direction: column;
+		font-size: clamp(2.6rem, 7.2vw, 4.75rem);
+		font-weight: 700;
+		line-height: 1.02;
+		letter-spacing: -0.035em;
+	}
+
+	.portada__apellido {
+		color: var(--texto-3);
+	}
+
+	.portada__rol {
+		margin-top: 1.1rem;
+		font-family: var(--mono);
+		font-size: clamp(0.9375rem, 1.6vw, 1.0625rem);
+		color: var(--amarillo);
+	}
+
+	.portada__intro {
+		max-width: 36rem;
+		margin-top: 1rem;
+		font-size: clamp(1.0625rem, 1.8vw, 1.25rem);
+		line-height: 1.6;
+		color: var(--texto-2);
+	}
+
+	.portada__ahora {
+		margin-top: 1.25rem;
+		font-family: var(--mono);
+		font-size: 0.9375rem;
+		color: var(--texto);
+	}
+
+	.escribe {
+		display: inline-block;
+		max-width: 100%;
+		color: var(--verde);
+		vertical-align: bottom;
+		white-space: nowrap;
+		overflow: hidden;
+	}
+
+	@media (prefers-reduced-motion: no-preference) {
+		.escribe {
+			width: calc(var(--letras) * 1ch);
+			animation: escribir 2.6s steps(var(--letras)) 0.9s both;
+		}
+	}
+
+	@keyframes escribir {
+		from {
+			width: 0;
+		}
+	}
+
+	.portada__acciones {
+		align-items: center;
+		margin-top: 2rem;
+	}
+
+	.portada__redes {
+		display: inline-flex;
+		gap: 0.25rem;
+		margin-left: 0.25rem;
+	}
+
+	.disponible {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.6rem;
+		margin-top: 1.5rem;
+		font-family: var(--mono);
+		font-size: 0.8125rem;
+		color: var(--texto-3);
+	}
+
+	.disponible__punto {
+		position: relative;
+		width: 0.55rem;
+		height: 0.55rem;
+		border-radius: 50%;
+		background: var(--verde);
+	}
+
+	@media (prefers-reduced-motion: no-preference) {
+		.disponible__punto::after {
+			content: '';
+			position: absolute;
+			inset: 0;
+			border-radius: 50%;
+			background: var(--verde);
+			animation: latido 2.4s ease-out infinite;
+		}
+	}
+
+	@keyframes latido {
+		from {
+			opacity: 0.6;
+			scale: 1;
+		}
+		to {
+			opacity: 0;
+			scale: 3;
+		}
+	}
+
+	.portada__retrato {
+		width: min(100%, 26rem);
+		justify-self: center;
+	}
+
+	@media (min-width: 60rem) {
+		.portada__retrato {
+			justify-self: end;
+		}
+	}
+
+	/* mario.yml */
+	.ficha {
+		margin: clamp(2.5rem, 6vw, 4rem) 0 0;
+	}
+
+	.ficha__barra {
+		min-height: 2rem;
+	}
+
+	.ficha__filas {
+		display: grid;
+		padding: 0.6rem 0;
+		font-family: var(--mono);
+		font-size: 0.875rem;
+	}
+
+	@media (min-width: 48rem) {
+		.ficha__filas {
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+		}
+	}
+
+	/* Número de línea, clave y valor; en pantallas chicas el valor baja, alineado con la clave. */
+	.ficha__fila {
+		display: grid;
+		grid-template-columns: 2.75rem auto minmax(0, 1fr);
+		align-items: baseline;
+		gap: 0.15rem 0.6rem;
+		padding: 0.3rem 1rem 0.3rem 0;
+	}
+
+	@media (max-width: 30rem) {
+		.ficha__fila {
+			grid-template-columns: 2rem minmax(0, 1fr);
+		}
+		.ficha dd {
+			grid-column: 2;
+		}
+	}
+
+	.ficha__linea {
+		color: var(--texto-3);
+		text-align: right;
+		opacity: 0.7;
+	}
+
+	.ficha dt {
+		color: var(--azul);
+	}
+
+	.ficha dd {
+		margin: 0;
+		color: var(--verde);
+	}
+
+	.ficha__nota {
+		margin-left: 0.6rem;
+		color: var(--texto-3);
+	}
+
+	/* ---------- Secciones ---------- */
+
+	.seccion--banda {
+		border-block: 1px solid var(--borde);
+		background: color-mix(in srgb, var(--fondo-2) 55%, transparent);
+	}
+
+	/* Sobre mí */
+	.sobre {
+		display: grid;
+		gap: 2.5rem;
+		align-items: start;
+	}
+
+	@media (min-width: 60rem) {
+		.sobre {
+			grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+			gap: 4rem;
+		}
+	}
+
+	.sobre__texto {
+		display: grid;
+		gap: 1.1rem;
+		max-width: var(--ancho-texto);
+		font-size: 1.0625rem;
+		color: var(--texto-2);
+	}
+
+	.sobre__texto .seccion__titulo {
+		margin-bottom: 0.6rem;
+		color: var(--texto);
+	}
+
+	.rumbo {
+		margin-top: 0.75rem;
+		padding: 1.1rem 1.25rem;
+		border: 1px solid var(--borde);
+		border-left: 3px solid var(--naranja);
+		border-radius: var(--radio-chico);
+		background: var(--fondo-2);
+	}
+
+	.rumbo__clave {
+		margin-bottom: 0.35rem;
+		font-family: var(--mono);
+		font-size: 0.8125rem;
+		color: var(--naranja);
+	}
+
+	.aprendo__cuerpo {
+		padding: 1.4rem 1.5rem 1.5rem;
+	}
+
+	.aprendo__titulo {
+		margin-bottom: 1rem;
+		font-family: var(--mono);
+		font-size: 1rem;
+		font-weight: 600;
+		letter-spacing: 0;
+		color: var(--amarillo);
+	}
+
+	.aprendo__lista {
+		display: grid;
+		gap: 0.85rem;
+		list-style: none;
+		counter-reset: punto;
+	}
+
+	.aprendo__lista li {
+		position: relative;
+		padding-left: 2.1rem;
+		font-size: 0.975rem;
+		color: var(--texto-2);
+		counter-increment: punto;
+	}
+
+	.aprendo__lista li::before {
+		content: counter(punto, decimal-leading-zero);
+		position: absolute;
+		left: 0;
+		top: 0.15rem;
+		font-family: var(--mono);
+		font-size: 0.75rem;
+		color: var(--texto-3);
+	}
+
+	.aprendo__ahora {
+		margin-top: 1.4rem;
+		padding: 0.95rem 1.1rem;
+		border-radius: var(--radio-chico);
+		background: color-mix(in srgb, var(--rosa) 13%, var(--fondo-2));
+		color: var(--texto);
+		font-size: 0.975rem;
+	}
+
+	.aprendo__marca {
+		display: block;
+		margin-bottom: 0.2rem;
+		font-family: var(--mono);
+		font-size: 0.75rem;
+		text-transform: uppercase;
+		letter-spacing: 0.08em;
+		color: var(--rosa);
+	}
+
+	/* Experiencia */
+	.trabajo__head {
+		color: var(--amarillo);
+	}
+
+	.trabajo__cuerpo {
+		padding: clamp(1.4rem, 3.5vw, 2.25rem);
+	}
+
+	.trabajo__cabecera {
+		display: flex;
+		flex-wrap: wrap;
+		justify-content: space-between;
+		gap: 1rem 2rem;
+	}
+
+	.trabajo__puesto {
+		font-size: clamp(1.4rem, 2.6vw, 1.75rem);
+	}
+
+	.trabajo__empresa {
+		margin-top: 0.3rem;
+		font-size: 1.0625rem;
+		color: var(--texto);
+	}
+
+	.trabajo__fecha {
+		display: grid;
+		gap: 0.15rem;
+		font-family: var(--mono);
+		font-size: 0.8125rem;
+		color: var(--texto-3);
+		text-align: right;
+	}
+
+	@media (max-width: 40rem) {
+		.trabajo__fecha {
+			text-align: left;
+		}
+	}
+
+	.trabajo__contexto {
+		max-width: var(--ancho-texto);
+		margin-top: 1rem;
+		color: var(--texto-2);
+	}
+
+	.cifras {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(8.5rem, 1fr));
+		gap: 1px;
+		margin-top: 1.75rem;
+		border: 1px solid var(--borde);
+		border-radius: var(--radio-chico);
+		background: var(--borde);
+		list-style: none;
+		overflow: hidden;
+	}
+
+	.cifra {
+		display: grid;
+		gap: 0.2rem;
+		padding: 1.1rem 1.1rem 1rem;
+		background: var(--fondo-2);
+	}
+
+	.cifra__valor {
+		font-family: var(--mono);
+		font-size: clamp(2rem, 4vw, 2.75rem);
+		font-weight: 600;
+		line-height: 1;
+		color: var(--amarillo);
+		font-variant-numeric: tabular-nums;
+	}
+
+	.cifra:nth-child(2) .cifra__valor {
+		color: var(--verde);
+	}
+	.cifra:nth-child(3) .cifra__valor {
+		color: var(--aqua);
+	}
+	.cifra:nth-child(4) .cifra__valor {
+		color: var(--naranja);
+	}
+	.cifra:nth-child(5) .cifra__valor {
+		color: var(--rosa);
+	}
+
+	.cifra__etiqueta {
+		font-size: 0.875rem;
+		color: var(--texto-2);
+	}
+
+	.cifras__nota {
+		margin-top: 0.5rem;
+		font-family: var(--mono);
+		font-size: 0.75rem;
+		color: var(--texto-3);
+	}
+
+	/* Logros como un diff: líneas agregadas. */
+	.diff {
+		display: grid;
+		gap: 0.35rem;
+		margin-top: 1.5rem;
+		list-style: none;
+	}
+
+	.diff li {
+		position: relative;
+		padding: 0.55rem 0.9rem 0.55rem 2.2rem;
+		border-radius: 6px;
+		background: color-mix(in srgb, var(--verde) 9%, transparent);
+		color: var(--texto-2);
+	}
+
+	.diff li::before {
+		content: '+';
+		position: absolute;
+		left: 0.85rem;
+		top: 0.55rem;
+		font-family: var(--mono);
+		font-weight: 700;
+		color: var(--verde);
+	}
+
+	/* Proyectos */
+	.proyectos__cabecera {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: flex-end;
+		justify-content: space-between;
+		gap: 1.5rem;
+	}
+
+	.filtros {
+		display: flex;
+		max-width: 100%;
+		overflow-x: auto;
+		scrollbar-width: none;
+		gap: 0.4rem;
+		padding: 0.3rem;
+		border: 1px solid var(--borde);
+		border-radius: 10px;
+		background: var(--fondo-2);
+	}
+
+	.filtro {
+		display: inline-flex;
+		flex: none;
+		white-space: nowrap;
+		align-items: center;
+		gap: 0.4rem;
+		min-height: 2.25rem;
+		padding: 0 0.8rem;
+		border: 0;
+		border-radius: 7px;
+		background: none;
+		color: var(--texto-3);
+		font: 0.8125rem var(--mono);
+		cursor: pointer;
+		transition:
+			background-color 0.15s,
+			color 0.15s;
+	}
+
+	.filtro:hover {
+		color: var(--texto);
+	}
+
+	.filtro[aria-pressed='true'] {
+		background: var(--fondo-3);
+		color: var(--texto);
+		box-shadow: inset 0 -2px 0 var(--amarillo);
+	}
+
+	.filtro__n {
+		padding: 0 0.35rem;
+		border-radius: 4px;
+		background: var(--fondo);
+		font-size: 0.6875rem;
+	}
+
+	.proyectos {
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(min(100%, 21rem), 1fr));
+		gap: 1.25rem;
+		list-style: none;
+	}
+
+	.proyectos > li {
+		display: grid;
+	}
+
+	/* Stack */
+	.stack {
+		font-family: var(--mono);
+		font-size: 0.875rem;
+		overflow: visible;
+	}
+
+	.stack__fila {
+		display: grid;
+		grid-template-columns: 11rem minmax(0, 1fr) minmax(0, 1fr);
+		align-items: center;
+		gap: 1rem;
+		padding: 0.85rem 1.25rem;
+		border-top: 1px solid var(--borde);
+	}
+
+	.stack__fila--titulos {
+		border-top: 0;
+		padding-block: 0.7rem;
+		background: var(--fondo-3);
+		border-radius: var(--radio) var(--radio) 0 0;
+	}
+
+	.stack__area {
+		color: var(--azul);
+	}
+
+	.stack__celda {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 0.6rem;
+		min-height: 2.5rem;
+	}
+
+	@media (max-width: 48rem) {
+		.stack__fila {
+			grid-template-columns: 1fr;
+			gap: 0.6rem;
+		}
+		.stack__fila--titulos {
+			display: none;
+		}
+		.stack__area {
+			font-weight: 600;
+		}
+		.stack__celda::before {
+			content: attr(data-titulo) ':';
+			width: 100%;
+			font-size: 0.75rem;
+			color: var(--texto-3);
+		}
+		.stack__celda:empty {
+			display: none;
+		}
+	}
+
+	/* Formación */
+	.formacion {
+		display: grid;
+		gap: 1.25rem;
+	}
+
+	@media (min-width: 52rem) {
+		.formacion {
+			grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+		}
+	}
+
+	.bloque {
+		display: grid;
+		align-content: start;
+		gap: 0.5rem;
+		padding: 1.5rem 1.6rem;
+		border: 1px solid var(--borde);
+		border-radius: var(--radio);
+		background: var(--fondo-2);
+	}
+
+	.bloque h3 {
+		font-size: 1.375rem;
+	}
+
+	.bloque__meta {
+		font-family: var(--mono);
+		font-size: 0.75rem;
+		color: var(--texto-3);
+	}
+
+	.bloque__sub {
+		color: var(--texto-2);
+	}
+
+	.bloque__grado {
+		margin-top: 0.75rem;
+		padding-top: 0.9rem;
+		border-top: 1px dashed var(--borde);
+		color: var(--texto-2);
+		font-size: 0.975rem;
+	}
+
+	.bloque__egreso {
+		font-family: var(--mono);
+		font-size: 0.8125rem;
+		color: var(--verde);
+	}
+
+	.idiomas {
+		display: grid;
+		gap: 0.75rem;
+		margin: 0.4rem 0 0;
+	}
+
+	.idiomas dt {
+		font-weight: 600;
+	}
+
+	.idiomas dd {
+		margin: 0;
+		color: var(--texto-2);
+		font-size: 0.9375rem;
+	}
+
+	/* Contacto */
+	.contacto {
+		padding-bottom: clamp(5rem, 10vw, 8rem);
+	}
+
+	.contacto__rejilla {
+		display: grid;
+		gap: 2.5rem;
+		align-items: center;
+	}
+
+	@media (min-width: 60rem) {
+		.contacto__rejilla {
+			grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+			gap: 4rem;
+		}
+	}
+
+	.contacto__titulo {
+		font-size: clamp(2.25rem, 5.5vw, 3.5rem);
+	}
+
+	.contacto__texto {
+		max-width: 32rem;
+		margin: 1rem 0 1.75rem;
+		font-size: 1.125rem;
+		color: var(--texto-2);
+	}
+
+	.terminal__cuerpo {
+		display: grid;
+		gap: 0.15rem;
+		margin: 0;
+		padding: 1.1rem 1.25rem 0.5rem;
+		font-family: var(--mono);
+		font-size: 0.875rem;
+	}
+
+	.terminal__fila {
+		display: grid;
+		grid-template-columns: 6.5rem minmax(0, 1fr);
+		align-items: center;
+		min-height: 2.4rem;
+	}
+
+	.terminal__fila dt {
+		color: var(--texto-3);
+	}
+
+	.terminal__fila dd {
+		display: flex;
+		align-items: center;
+		gap: 0.4rem;
+		min-width: 0;
+		margin: 0;
+		overflow-wrap: anywhere;
+	}
+
+	.copiar {
+		display: inline-grid;
+		place-items: center;
+		width: 2rem;
+		height: 2rem;
+		flex: none;
+		border: 1px solid var(--borde);
+		border-radius: 6px;
+		background: var(--fondo-3);
+		color: var(--texto-2);
+		cursor: pointer;
+	}
+
+	.copiar:hover {
+		color: var(--texto);
+		border-color: var(--borde-fuerte);
+	}
+
+	.copiar :global(.simbolo) {
+		width: 0.95rem;
+		height: 0.95rem;
+	}
+
+	.terminal__fin {
+		padding: 0 1.25rem 1.1rem;
+		font-family: var(--mono);
+		font-size: 0.875rem;
+	}
+</style>
+
+<script>
+	// Cifras que se cuentan solas al entrar en pantalla. El número final ya está en el HTML.
+	const quieto = matchMedia('(prefers-reduced-motion: reduce)').matches;
+	const cifras = [...document.querySelectorAll<HTMLElement>('[data-cifra]')];
+	if (!quieto && 'IntersectionObserver' in window) {
+		const contar = (el: HTMLElement) => {
+			const final = Number(el.dataset.cifra);
+			const inicio = performance.now();
+			const duracion = 900 + final * 25;
+			const cuadro = (ahora: number) => {
+				const t = Math.min(1, (ahora - inicio) / duracion);
+				el.textContent = String(Math.round(final * (1 - (1 - t) ** 3)));
+				if (t < 1) requestAnimationFrame(cuadro);
+			};
+			requestAnimationFrame(cuadro);
+		};
+		const observador = new IntersectionObserver(
+			(entradas) => {
+				for (const e of entradas) {
+					if (!e.isIntersecting) continue;
+					observador.unobserve(e.target);
+					contar(e.target as HTMLElement);
+				}
+			},
+			{ threshold: 0.6 },
+		);
+		for (const c of cifras) {
+			c.textContent = '0';
+			observador.observe(c);
+		}
+	}
+
+	// Filtro de proyectos, con una transición suave donde el navegador la soporta.
+	const grupo = document.querySelector<HTMLElement>('[data-filtros]');
+	const lista = document.querySelector<HTMLElement>('[data-proyectos]');
+	const estado = document.querySelector<HTMLElement>('[data-filtro-estado]');
+	if (grupo && lista) {
+		grupo.hidden = false;
+		const botones = [...grupo.querySelectorAll<HTMLButtonElement>('[data-filtro]')];
+		const items = [...lista.querySelectorAll<HTMLElement>(':scope > li')];
+		const aplicar = (valor: string) => {
+			let n = 0;
+			for (const item of items) {
+				const ver = valor === 'todos' || item.dataset.tipo === valor;
+				item.hidden = !ver;
+				if (ver) n++;
+			}
+			for (const b of botones) b.setAttribute('aria-pressed', String(b.dataset.filtro === valor));
+			if (estado) estado.textContent = `${n} ${n === 1 ? 'proyecto' : 'proyectos'}`;
+		};
+		for (const boton of botones) {
+			boton.addEventListener('click', () => {
+				const valor = boton.dataset.filtro ?? 'todos';
+				if (!document.startViewTransition || quieto) return aplicar(valor);
+				items.forEach((item) => (item.style.viewTransitionName = `tarjeta-${item.dataset.id}`));
+				document.startViewTransition(() => aplicar(valor)).finished.finally(() => items.forEach((item) => (item.style.viewTransitionName = '')));
+			});
+		}
+	}
+</script>

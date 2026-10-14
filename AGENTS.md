@@ -9,7 +9,6 @@ Sitio estático en Astro 7 que se publica en GitHub Pages. Comandos y estructura
 - En los proyectos de equipo, `aporte` lleva solo la parte de Mario.
 - No publiques el teléfono ni la edad. El correo no va completo en el HTML: lo arma el script de `src/layouts/Base.astro`.
 - El CV de `public/cv/` se genera en `marca-personal/cv/generar-cv.mjs` (versión `salida/web/`, sin teléfono). No lo edites aquí: regenéralo allá y cópialo.
-- El CV de `public/cv/` se genera en `marca-personal/cv/generar-cv.mjs` (versión `salida/web/`, sin teléfono). No lo edites aquí: regenéralo allá y cópialo.
 - No muestres como personales los proyectos de Resultar.
 - Escribe en español, con tildes.
 
@@ -27,7 +26,9 @@ Antes de dar por terminado un cambio:
 
 - Corre `npm run check` y `npm run build`.
 - Mantén un contraste de 4,5:1 para el texto en los dos temas (WCAG 2.2), el foco visible y objetivos táctiles de al menos 24×24 px.
-- Si cambias los datos de la imagen para compartir, corre `npm run imagenes`.
+- Si cambias la foto, corre `npm run semitono` y después `npm run imagenes`. Si cambias los datos de la imagen para compartir, basta con `npm run imagenes`.
+- Revisa los dos temas, el celular (390 px) y el escritorio, y que todo lo animado respete `prefers-reduced-motion`.
+- Los colores van como tokens en `src/styles/global.css`; no pongas colores sueltos en los componentes, salvo el marco del retrato, que es oscuro en los dos temas.
 
 ## Documentación de Astro
 

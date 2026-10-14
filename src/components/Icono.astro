@@ -1,0 +1,19 @@
+---
+// Ícono de una tecnología, con su nombre (y nivel, si se pasa) como tooltip.
+// Lleva las dos versiones del ícono; el CSS muestra la del tema activo.
+interface Props {
+	id: string;
+	nombre: string;
+	nivel?: string;
+	tam?: string;
+}
+
+const { id, nombre, nivel, tam } = Astro.props;
+const descripcion = nivel ? `${nombre}, nivel ${nivel}` : nombre;
+---
+
+<span class="icono" tabindex="0" role="img" aria-label={descripcion} style={tam ? `--tam-icono:${tam}` : undefined}>
+	<img class="icono__claro" src={`/iconos/${id}-claro.svg`} alt="" width="48" height="48" loading="lazy" decoding="async" />
+	<img class="icono__oscuro" src={`/iconos/${id}-oscuro.svg`} alt="" width="48" height="48" loading="lazy" decoding="async" />
+	<span class="icono__globo" aria-hidden="true">{nombre}{nivel && <small>{nivel}</small>}</span>
+</span>

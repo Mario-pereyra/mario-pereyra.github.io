@@ -4,7 +4,6 @@ resumen: Servidor MCP que permite a agentes de IA consultar bases de datos de TO
 tipo: personal
 periodo: Septiembre de 2026 – actualidad
 orden: 2
-destacado: true
 stack: [TypeScript, Node.js, Model Context Protocol, SQL Server, PostgreSQL, Oracle]
 aporte:
   - "Diseñé cinco herramientas para el agente: listar perfiles de conexión sin revelar credenciales, probar la conexión, ejecutar una consulta de solo lectura, describir una tabla y listar tablas."

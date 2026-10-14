@@ -4,7 +4,6 @@ resumen: Catálogo público y panel de inventario para el emprendimiento de cart
 tipo: familiar
 periodo: Septiembre de 2026
 orden: 1
-destacado: true
 stack: [TypeScript, React Router, Cloudflare Workers, PostgreSQL, Prisma, Cloudflare R2, Vitest, GitHub Actions]
 aporte:
   - Desarrollé el catálogo público y el panel de inventario, que se instala como PWA, y los puse en producción en Cloudflare Workers.
@@ -15,6 +14,8 @@ demo: https://vintage.marioelprogamer710.workers.dev
 codigo:
   - etiqueta: Código
     url: https://github.com/mario-pereyra/vintage
+captura: ../../assets/proyectos/vintage.png
+capturaAlt: "Portada de Vintage Secret's en un celular: fondo rosa, la tarjeta «Pronto nuevas carteras» con 0 disponibles y 0 reservadas, y el botón «Avisame del próximo drop»."
 ---
 
 ## Contexto

@@ -1,0 +1,133 @@
+---
+// Línea de estado al estilo de vim, fija abajo en pantallas medianas y grandes.
+// Muestra la sección en la que se está (como nombre de archivo), cuánto se avanzó y la hora en Santa Cruz.
+interface Props {
+	archivo?: string;
+}
+
+const { archivo = 'inicio.md' } = Astro.props;
+---
+
+<div class="estado" aria-hidden="true">
+	<span class="estado__modo" data-estado-modo>NORMAL</span>
+	<span class="estado__rama">main</span>
+	<span class="estado__archivo" data-estado-archivo>{archivo}</span>
+	<span class="estado__relleno"></span>
+	<span class="estado__dato">utf-8</span>
+	<span class="estado__dato estado__hora">santa cruz <span data-estado-hora>--:--</span></span>
+	<span class="estado__avance" data-estado-avance>arriba</span>
+</div>
+
+<style>
+	.estado {
+		position: fixed;
+		inset: auto 0 0;
+		z-index: 30;
+		display: none;
+		align-items: stretch;
+		height: var(--alto-estado);
+		border-top: 1px solid var(--borde);
+		background: var(--fondo-2);
+		font-family: var(--mono);
+		font-size: 0.75rem;
+		line-height: var(--alto-estado);
+		color: var(--texto-3);
+		white-space: nowrap;
+	}
+
+	@media (min-width: 48rem) {
+		.estado {
+			display: flex;
+		}
+		:global(body) {
+			padding-bottom: var(--alto-estado);
+		}
+	}
+
+	.estado > span {
+		padding: 0 0.85rem;
+	}
+
+	.estado__modo {
+		background: var(--texto-3);
+		color: var(--fondo);
+		font-weight: 600;
+		transition: background-color 0.2s;
+	}
+
+	:global(html[data-modo='comando']) .estado__modo {
+		background: var(--amarillo);
+	}
+
+	.estado__rama {
+		color: var(--verde);
+	}
+
+	.estado__archivo {
+		color: var(--texto);
+	}
+
+	.estado__relleno {
+		flex: 1;
+	}
+
+	.estado__avance {
+		min-width: 6ch;
+		background: var(--fondo-3);
+		color: var(--texto-2);
+		text-align: right;
+	}
+
+	@media (max-width: 60rem) {
+		.estado__dato:not(.estado__hora) {
+			display: none;
+		}
+	}
+</style>
+
+<script>
+	const modo = document.querySelector('[data-estado-modo]');
+	const archivo = document.querySelector('[data-estado-archivo]');
+	const avance = document.querySelector('[data-estado-avance]');
+	const hora = document.querySelector('[data-estado-hora]');
+
+	// Modo: COMANDO mientras la paleta está abierta.
+	new MutationObserver(() => {
+		if (modo) modo.textContent = document.documentElement.dataset.modo === 'comando' ? 'COMANDO' : 'NORMAL';
+	}).observe(document.documentElement, { attributes: true, attributeFilter: ['data-modo'] });
+
+	// Hora de Bolivia (UTC−4), útil para quien coordina en remoto.
+	const formato = new Intl.DateTimeFormat('es-BO', { timeZone: 'America/La_Paz', hour: '2-digit', minute: '2-digit', hour12: false });
+	const tic = () => hora && (hora.textContent = formato.format(new Date()));
+	tic();
+	setInterval(tic, 15000);
+
+	// Avance como en vim: «arriba», un porcentaje o «abajo».
+	function medirAvance() {
+		const total = document.documentElement.scrollHeight - innerHeight;
+		const porcentaje = total > 0 ? Math.round((scrollY / total) * 100) : 0;
+		if (avance) avance.textContent = porcentaje <= 0 ? 'arriba' : porcentaje >= 100 ? 'abajo' : `${porcentaje}%`;
+	}
+	addEventListener('scroll', medirAvance, { passive: true });
+	medirAvance();
+
+	// La sección visible da el nombre de archivo y marca la pestaña de la cabecera.
+	const secciones = [...document.querySelectorAll<HTMLElement>('[data-archivo]')];
+	const pestanas = [...document.querySelectorAll<HTMLAnchorElement>('[data-pestana]')];
+	if (secciones.length) {
+		const visibles = new Map<HTMLElement, number>();
+		const observador = new IntersectionObserver(
+			(entradas) => {
+				for (const e of entradas) visibles.set(e.target as HTMLElement, e.isIntersecting ? e.intersectionRatio : 0);
+				let mejor: HTMLElement | undefined;
+				let razon = 0;
+				for (const [seccion, r] of visibles) if (r > razon) [mejor, razon] = [seccion, r];
+				if (!mejor) return;
+				if (archivo) archivo.textContent = mejor.dataset.archivo ?? '';
+				for (const p of pestanas) p.setAttribute('aria-current', String(p.dataset.pestana === mejor.id));
+			},
+			{ rootMargin: '-35% 0px -55% 0px', threshold: [0, 0.01, 0.25, 0.5, 1] },
+		);
+		for (const s of secciones) observador.observe(s);
+	}
+</script>
