@@ -9,7 +9,7 @@ aporte:
   - "Diseñé cinco herramientas para el agente: listar perfiles de conexión sin revelar credenciales, probar la conexión, ejecutar una consulta de solo lectura, describir una tabla y listar tablas."
   - Aseguré el modo solo lectura en capas; la primera es un analizador léxico por dialecto que solo acepta una sentencia que empiece con SELECT o WITH.
   - Enriquecí la descripción de cada tabla con el diccionario SX3 de Protheus de la misma empresa.
-  - Cubrí el código con 8 archivos de prueba.
+  - Cubrí el código con pruebas automatizadas.
 codigoPrivado: true
 ---
 

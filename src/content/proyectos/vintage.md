@@ -8,7 +8,7 @@ stack: [TypeScript, React Router, Cloudflare Workers, PostgreSQL, Prisma, Cloudf
 aporte:
   - Desarrollé el catálogo público y el panel de inventario, que se instala como PWA, y los puse en producción en Cloudflare Workers.
   - Implementé las consultas de inventario y de compradoras, y la rentabilidad por lote, por proveedor y con desglose.
-  - Aislé la lógica de negocio en un módulo de dominio con 16 archivos de prueba en Vitest.
+  - Aislé la lógica de negocio en un módulo de dominio, probado con Vitest sobre un Postgres en memoria con las mismas migraciones que producción.
   - Configuré la integración continua en GitHub Actions y documenté las decisiones de arquitectura en ADR.
 demo: https://vintage.marioelprogamer710.workers.dev
 codigo:

@@ -7,9 +7,9 @@ periodo: Julio de 2026
 orden: 3
 stack: [NestJS, TypeScript, Sequelize, PostgreSQL, Zod, React, Vite, Leaflet, Docker]
 aporte:
-  - Integré la API de TheSportsDB para sincronizar los resultados y cargué 78 partidos reales como datos iniciales.
+  - Integré la API de TheSportsDB para sincronizar los resultados y cargué los partidos reales del Mundial como datos iniciales.
   - Agregué los endpoints de equipos y estadios, y la configuración de Docker del backend.
-  - Hice la primera versión completa del frontend en React (41 archivos) y después la consulta y edición del perfil, la corrección del mapa de sedes y la traducción al español.
+  - Hice la primera versión completa del frontend en React y después la consulta y edición del perfil, la corrección del mapa de sedes y la traducción al español.
 demo: https://quinela-mundialera-frontend.vercel.app
 codigo:
   - etiqueta: Backend
